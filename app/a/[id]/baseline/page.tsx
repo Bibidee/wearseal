@@ -1,0 +1,1 @@
+export default function Baseline(){return <main className="wrap"><div className="wordmark">WEARSEAL<span className="orange">/</span> BASELINE</div><h1>Checkout proof</h1><p>Owner publishes the HTTPS image and expected hash. Renter accepts the exact definition only after the contract verifies the committed bytes.</p></main>}

@@ -1,0 +1,1 @@
+export default function ReturnProof(){return <main className="wrap"><div className="wordmark">WEARSEAL<span className="orange">/</span> RETURN</div><h1>Pin the return.</h1><p>Submit one public HTTPS image and its expected hash. The owner cannot replace the evidence, and an owner refusal cannot veto a submitted return forever.</p></main>}

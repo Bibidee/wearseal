@@ -1,0 +1,17 @@
+name: wearseal-ci
+on: [push,pull_request]
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22, cache: npm, cache-dependency-path: wearseal/package.json}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - run: npm install --no-audit --no-fund
+        working-directory: wearseal
+      - run: npm run typecheck && npm test && npm run build
+        working-directory: wearseal
+      - run: python -m py_compile contracts/wearseal_agreement.py contracts/wearseal_vault.py
+        working-directory: wearseal
