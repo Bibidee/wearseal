@@ -1,1 +1,2 @@
-export default function Accept(){return <main className="wrap"><div className="wordmark">WEARSEAL<span className="orange">/</span> ACCEPT</div><section style={{maxWidth:680,margin:'80px auto'}}><div className="mono orange">RENTER / DEFINITION CHECK</div><h1>Accept the exact passport.</h1><p>Paste an agreement ID to read the authoritative definition hash, rubric, parties, deposit and checkout commitment from Studionet before signing.</p><input className="plate" style={{padding:14,width:'100%'}} placeholder="Agreement ID"/><button className="button">READ + ACCEPT →</button></section></main>}
+import LiveRoute from '../../components/live-route';
+export default function Accept(){return <LiveRoute id={process.env.NEXT_PUBLIC_AGREEMENT_ADDRESS||''} action="accept"/>}

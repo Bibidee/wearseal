@@ -1,1 +1,2 @@
-export default async function Receipt({params}:{params:Promise<{id:string}>}){const {id}=await params;return <main className="wrap"><div className="wordmark">WEARSEAL<span className="orange">/</span> RECEIPT</div><section style={{maxWidth:700,margin:'80px auto'}}><div className="mono orange">SETTLEMENT / {id}</div><h1>Condition became a deterministic split.</h1><p>Receipt data is shown only after finality, execution success, and a fresh Agreement + Vault readback. Tx hash and explorer links belong here.</p></section></main>}
+import LiveRoute from '../../../components/live-route';
+export default async function Receipt({params}:{params:Promise<{id:string}>}){return <LiveRoute id={(await params).id} action="receipt"/>}

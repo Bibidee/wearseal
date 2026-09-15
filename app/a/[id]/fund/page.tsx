@@ -1,1 +1,2 @@
-export default function Fund(){return <main className="wrap"><div className="wordmark">WEARSEAL<span className="orange">/</span> FUND</div><h1>Deposit the exact security.</h1><p>The Vault accepts only the stored renter address and exact Agreement deposit. Funding is not complete until the authoritative Vault read confirms it.</p></main>}
+import LiveRoute from '../../../../components/live-route';
+export default async function Fund({params}:{params:Promise<{id:string}>}){return <LiveRoute id={(await params).id} action="fund"/>}

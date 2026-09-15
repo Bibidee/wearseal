@@ -1,1 +1,2 @@
-export default function Baseline(){return <main className="wrap"><div className="wordmark">WEARSEAL<span className="orange">/</span> BASELINE</div><h1>Checkout proof</h1><p>Owner publishes the HTTPS image and expected hash. Renter accepts the exact definition only after the contract verifies the committed bytes.</p></main>}
+import LiveRoute from '../../../../components/live-route';
+export default async function Baseline({params}:{params:Promise<{id:string}>}){return <LiveRoute id={(await params).id} action="accept"/>}

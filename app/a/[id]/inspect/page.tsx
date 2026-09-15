@@ -1,1 +1,2 @@
-export default function Inspect(){return <main className="wrap"><div className="wordmark">WEARSEAL<span className="orange">/</span> INSPECT</div><h1>Compare the exact pair.</h1><p>GenLayer validators independently fetch the checkout and return bytes, compare the two images, and store only a bounded verdict and observations.</p></main>}
+import LiveRoute from '../../../../components/live-route';
+export default async function Inspect({params}:{params:Promise<{id:string}>}){return <LiveRoute id={(await params).id} action="inspect"/>}
