@@ -35,6 +35,11 @@ txs.acceptBaseline = await write(renterClient, agreement, 'accept_baseline', [de
 txs.deposit = await write(renterClient, vault, 'deposit', [], deposit);
 txs.submitReturn = await write(renterClient, agreement, 'submit_return', [returnUrl, returnHash]);
 txs.inspect = await write(ownerClient, agreement, 'inspect');
+let inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
+if (inspected.status === 'RETURN_SUBMITTED') {
+  txs.inspectRetry = await write(ownerClient, agreement, 'inspect');
+  inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
+}
 txs.settle = await write(ownerClient, vault, 'settle');
 const readback = {
   agreement: await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] }),

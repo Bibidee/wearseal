@@ -6,35 +6,35 @@
     "sources": [
       {
         "path": "contracts/wearseal_agreement.py",
-        "bytes": 9047,
-        "sha256": "44504bd56fc69c04a380f92f798f8fe6ce0f7a719f596feea21e760bfcae704a"
+        "bytes": 9716,
+        "sha256": "101bd71c96951a0bc1f5ce6824fdaa398cb2bc0d5318d76d7e7099ee19349ff2"
       },
       {
         "path": "contracts/wearseal_vault.py",
-        "bytes": 2062,
-        "sha256": "42c980731599f317d7b887df3636221544342d353b62d4dfa8024999ebfab18e"
+        "bytes": 2035,
+        "sha256": "d7c836e1ea0a4d0880ae712b19618cd9ff632a5e0dc8457674b6c506548dbf91"
       }
     ],
     "agreement": {
-      "address": "0x945A5ED65cA5F091541d6582B76D81872597C44E",
-      "tx": "0x1176d2b945ff98360e825c5e0974ef0e0de15b0304bdca95da866c52cfc66874",
+      "address": "0xc69f9a5A60d42CCA231607ba1E271678D9A9B66F",
+      "tx": "0x75aa44a0e42133f8661486d09efff89eadd86a2f19e4b647639040fb4367478a",
       "execution": "SUCCESS",
-      "sourceSha256": "44504bd56fc69c04a380f92f798f8fe6ce0f7a719f596feea21e760bfcae704a"
+      "sourceSha256": "101bd71c96951a0bc1f5ce6824fdaa398cb2bc0d5318d76d7e7099ee19349ff2"
     },
     "vault": {
-      "address": "0x91C57bA3c2F39fc30aea8f625a34ba12f2591Aee",
-      "tx": "0x9e06f5a40f8d4916328a2b8b09914ff9e3c39ceb33c689ec609b9f5fd0389d1c",
+      "address": "0xcceD56af4f77acaB785d7Fa3447E0106931584a0",
+      "tx": "0xda2ddc8e017d7b7f6d134e517727c6a00dc7defc9d4ca3c9c505e54eec689a21",
       "execution": "SUCCESS",
-      "sourceSha256": "42c980731599f317d7b887df3636221544342d353b62d4dfa8024999ebfab18e"
+      "sourceSha256": "d7c836e1ea0a4d0880ae712b19618cd9ff632a5e0dc8457674b6c506548dbf91"
     },
     "binding": {
-      "tx": "0xfedb66b838ee44f8004fc82ff341cd53187e616f62ec1554e616557c8b2b4e67",
+      "tx": "0x0840550db11375d497f2cf78a4c62b436d04b315e52821e774501d6ba56cfeb5",
       "execution": "SUCCESS"
     },
     "readback": {
       "agreement": {
-        "checkout_hash": "0xf3848354e30a260b830f712e456599267547be13eb35a07fd598760e2abf0db5",
-        "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.svg",
+        "checkout_hash": "0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb",
+        "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
         "damage_level": "",
         "damage_regions": [],
         "deadline": 9999999999,
@@ -57,7 +57,7 @@
         "verdict": ""
       },
       "vault": {
-        "agreement": "0x945a5ed65ca5f091541d6582b76d81872597c44e",
+        "agreement": "0xc69f9a5a60d42cca231607ba1e271678d9a9b66f",
         "credited": 0,
         "settled": false
       }

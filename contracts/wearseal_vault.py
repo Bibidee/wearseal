@@ -31,9 +31,9 @@ class WearsealVault(gl.Contract):
         a=Agreement(self.agreement_contract).view().settlement_instruction();assert a["terminal"]
         self.settled=True;Agreement(self.agreement_contract).emit(on="finalized").mark_settled()
         owner_amount=self.credited*a["owner_bps"]//10000;renter_amount=self.credited-owner_amount
-        Recipient(Address(a["owner"])).emit_transfer(value=owner_amount);Recipient(Address(a["renter"])).emit_transfer(value=renter_amount)
+        Recipient(a["owner"]).emit_transfer(value=owner_amount);Recipient(a["renter"]).emit_transfer(value=renter_amount)
     @gl.public.write
     def refund_cancelled(self):
         assert self.credited>0 and not self.settled
         a=Agreement(self.agreement_contract).view().get_agreement();assert a["status"]=="CANCELLED"
-        self.settled=True;Recipient(Address(a["renter"])).emit_transfer(value=self.credited)
+        self.settled=True;Recipient(a["renter"]).emit_transfer(value=self.credited)

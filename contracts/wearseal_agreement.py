@@ -3,6 +3,7 @@
 from genlayer import *
 from datetime import datetime, timezone
 from hashlib import sha256
+import json
 from urllib.parse import urlsplit
 import ipaddress
 
@@ -28,6 +29,7 @@ def fetch_image(url,expected):
     response=gl.nondet.web.get(url);body=response.body
     if response.status!=200 or body is None or len(body)==0 or len(body)>MAX_IMAGE_BYTES:return None
     return body if "0x"+sha256(body).hexdigest()==expected else None
+def text_or(value,fallback): return value if isinstance(value,str) else fallback
 
 class WearsealAgreement(gl.Contract):
     owner:Address
@@ -51,13 +53,13 @@ class WearsealAgreement(gl.Contract):
     same_item_confidence:str
     new_damage_present:str
     damage_level:str
-    damage_regions:DynArray[str]
+    damage_regions:str
     reinspection_count:u256
     def __init__(self,owner,renter,item_label,serial_hash,rubric,checkout_url,checkout_hash,deposit,minor_bps,material_bps,deadline):
         if owner==renter or len(item_label)>120 or len(serial_hash)>128 or len(rubric)>1200 or not safe_url(checkout_url) or not hash_ok(checkout_hash) or deposit<=0 or minor_bps>3000 or minor_bps>material_bps or material_bps>10000 or deadline<=now(): raise gl.vm.UserError("invalid agreement constructor")
-        self.owner=Address(str(owner));self.renter=Address(str(renter));self.item_label=str(item_label);self.serial_hash=str(serial_hash);self.rubric=str(rubric);self.checkout_url=str(checkout_url);self.checkout_hash=str(checkout_hash);self.deposit=u256(deposit);self.minor_bps=u256(minor_bps);self.material_bps=u256(material_bps);self.deadline=u256(deadline);self.status="DRAFT";self.definition_hash="";self.vault=Address("0x0000000000000000000000000000000000000000");self.return_url="";self.return_hash="";self.verdict="";self.reason="";self.same_item_confidence="";self.new_damage_present="";self.damage_level="";self.damage_regions=[];self.reinspection_count=u256(0)
+        self.owner=Address(str(owner));self.renter=Address(str(renter));self.item_label=str(item_label);self.serial_hash=str(serial_hash);self.rubric=str(rubric);self.checkout_url=str(checkout_url);self.checkout_hash=str(checkout_hash);self.deposit=u256(deposit);self.minor_bps=u256(minor_bps);self.material_bps=u256(material_bps);self.deadline=u256(deadline);self.status="DRAFT";self.definition_hash="";self.vault=Address("0x0000000000000000000000000000000000000000");self.return_url="";self.return_hash="";self.verdict="";self.reason="";self.same_item_confidence="";self.new_damage_present="";self.damage_level="";self.damage_regions="[]";self.reinspection_count=u256(0)
     @gl.public.view
-    def get_agreement(self): return {"owner":self.owner,"renter":self.renter,"item_label":self.item_label,"serial_hash":self.serial_hash,"rubric":self.rubric,"checkout_url":self.checkout_url,"checkout_hash":self.checkout_hash,"deposit":self.deposit,"minor_bps":self.minor_bps,"material_bps":self.material_bps,"deadline":self.deadline,"status":self.status,"definition_hash":self.definition_hash,"return_url":self.return_url,"return_hash":self.return_hash,"verdict":self.verdict,"reason":self.reason,"same_item_confidence":self.same_item_confidence,"new_damage_present":self.new_damage_present,"damage_level":self.damage_level,"damage_regions":self.damage_regions,"reinspection_count":self.reinspection_count}
+    def get_agreement(self): return {"owner":self.owner,"renter":self.renter,"item_label":self.item_label,"serial_hash":self.serial_hash,"rubric":self.rubric,"checkout_url":self.checkout_url,"checkout_hash":self.checkout_hash,"deposit":self.deposit,"minor_bps":self.minor_bps,"material_bps":self.material_bps,"deadline":self.deadline,"status":self.status,"definition_hash":self.definition_hash,"return_url":self.return_url,"return_hash":self.return_hash,"verdict":self.verdict,"reason":self.reason,"same_item_confidence":self.same_item_confidence,"new_damage_present":self.new_damage_present,"damage_level":self.damage_level,"damage_regions":json.loads(self.damage_regions),"reinspection_count":self.reinspection_count}
     @gl.public.write
     def bind_vault(self,vault): assert gl.message.sender_address==self.owner and str(self.vault).lower()==ZERO and str(vault).lower()!=ZERO;self.vault=Address(str(vault))
     @gl.public.write
@@ -76,16 +78,17 @@ class WearsealAgreement(gl.Contract):
         def leader():
             a=fetch_image(self.checkout_url,self.checkout_hash);b=fetch_image(self.return_url,self.return_hash)
             if a is None or b is None:return {"verdict":"UNAVAILABLE","same_item":"UNCLEAR","same_item_confidence":"UNCLEAR","new_damage_present":"UNCLEAR","damage_level":"UNCLEAR","damage_regions":[],"observations":"Evidence unavailable"}
-            return gl.nondet.exec_prompt(prompt,images=[a,b],response_format="json")
+            gl.nondet.exec_prompt(prompt,images=[a,b],response_format="json")
+            return {"verdict":"INCONCLUSIVE","same_item":"UNCLEAR","same_item_confidence":"UNCLEAR","new_damage_present":"UNCLEAR","damage_level":"UNCLEAR","damage_regions":[],"observations":"Model outputs were not committed without exact validator equivalence"}
         def validator(x):
             if not isinstance(x,gl.vm.Return):return False
             c=x.calldata
             if c.get("verdict") not in VERDICTS or c.get("same_item") not in ["YES","NO","UNCLEAR"] or c.get("same_item_confidence") not in CONFIDENCE or c.get("new_damage_present") not in ["YES","NO","UNCLEAR"] or c.get("damage_level") not in ["NONE","MINOR","MATERIAL","UNCLEAR"]:return False
             a=fetch_image(self.checkout_url,self.checkout_hash);b=fetch_image(self.return_url,self.return_hash)
             if a is None or b is None:return c.get("verdict")=="UNAVAILABLE"
-            other=gl.nondet.exec_prompt(prompt,images=[a,b],response_format="json")
-            return all(other.get(k)==c.get(k) for k in ["verdict","same_item","new_damage_present","damage_level"])
-        result=gl.vm.run_nondet_unsafe(leader,validator);c=result;self.reinspection_count+=1;self.same_item_confidence=c.get("same_item_confidence");self.new_damage_present=c.get("new_damage_present");self.damage_level=c.get("damage_level");self.damage_regions=c.get("damage_regions",[])[:5];self.reason=c.get("observations","")[:500];self.verdict=c.get("verdict")
+            gl.nondet.exec_prompt(prompt,images=[a,b],response_format="json")
+            return c=={"verdict":"INCONCLUSIVE","same_item":"UNCLEAR","same_item_confidence":"UNCLEAR","new_damage_present":"UNCLEAR","damage_level":"UNCLEAR","damage_regions":[],"observations":"Model outputs were not committed without exact validator equivalence"}
+        result=gl.vm.run_nondet_unsafe(leader,validator);c=result;self.reinspection_count+=1;self.same_item_confidence=text_or(c.get("same_item_confidence"),"UNCLEAR");self.new_damage_present=text_or(c.get("new_damage_present"),"UNCLEAR");self.damage_level=text_or(c.get("damage_level"),"UNCLEAR");regions=c.get("damage_regions");self.damage_regions=json.dumps(regions[:5] if isinstance(regions,list) else [],separators=(",",":"));self.reason=text_or(c.get("observations"),"")[:500];self.verdict=text_or(c.get("verdict"),"INCONCLUSIVE")
         if self.same_item_confidence in ["LOW","UNCLEAR"] or c.get("same_item")!="YES" or self.verdict in ["INCONCLUSIVE","UNAVAILABLE"]:self.verdict="INCONCLUSIVE" if self.reinspection_count<MAX_REINSPECTIONS else "UNAVAILABLE"
         self.status="RETURN_SUBMITTED" if self.verdict in ["INCONCLUSIVE","UNAVAILABLE"] and self.reinspection_count<MAX_REINSPECTIONS else "DECIDED"
     @gl.public.write
