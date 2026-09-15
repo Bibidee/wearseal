@@ -1,4 +1,4 @@
-'use client';
+'use client';/* eslint-disable react-hooks/set-state-in-effect */
 import {createContext,useContext,useEffect,useState} from 'react';import {createClient} from 'genlayer-js';import {studionet} from 'genlayer-js/chains';import {isStudionet,STUDIONET} from '../genlayer/network';
 export type Provider={request(a:{method:string;params?:unknown[]}):Promise<unknown>;on?(e:string,f:(...a:any[])=>void):void;removeListener?(e:string,f:(...a:any[])=>void):void};
 export async function ensureStudionet(p:Provider){try{await p.request({method:'wallet_switchEthereumChain',params:[{chainId:`0x${STUDIONET.id.toString(16)}`}]})}catch(e){if((e as {code?:number}).code!==4902)throw e;await p.request({method:'wallet_addEthereumChain',params:[{chainId:`0x${STUDIONET.id.toString(16)}`,chainName:STUDIONET.name,nativeCurrency:{name:'GEN',symbol:'GEN',decimals:18},rpcUrls:[STUDIONET.rpcUrl],blockExplorerUrls:[STUDIONET.explorer]}]});await p.request({method:'wallet_switchEthereumChain',params:[{chainId:`0x${STUDIONET.id.toString(16)}`}]})}}

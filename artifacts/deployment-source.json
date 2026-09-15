@@ -1,0 +1,17 @@
+{
+  "network": "Studionet",
+  "chainId": 61999,
+  "signer": "0x79b3Ecbe6a65beE93b2Fcda78e6909892671507F",
+  "evidence": [
+    {
+      "path": "contracts/wearseal_agreement.py",
+      "bytes": 8287,
+      "sha256": "4d1dc32eb88840f23573bdd9a8de5d5561bd7cf55086293906d6d067ab598af8"
+    },
+    {
+      "path": "contracts/wearseal_vault.py",
+      "bytes": 1530,
+      "sha256": "748f1165e33575b4b20c50020387edcaf316cb29afd8a822bfdcccff8e8f23c6"
+    }
+  ]
+}

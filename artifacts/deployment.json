@@ -1,7 +1,9 @@
 {
-  "network": "Studionet",
-  "chainId": 61999,
-  "signer": "0x79b3Ecbe6a65beE93b2Fcda78e6909892671507F",
-  "agreement": {"address":"0x7E1F4d4146087F6Fb565110bb9C86F3d5De3080C","tx":"0xb9fb507368a0357cc1ea81105f3029ad9349be200ebff262238e72a9ab3639d4","execution":"SUCCESS","sourceSha256":"94E9427189B99DBE9601ADACB51627D16E6B6C996CC6DDF2841419FCC40B4707"},
-  "vault": {"address":"0x9eE8c58C81F432A9B4BFae0e2615169DA4A46EfF","tx":"0x3be973b276cde64b43fc1297f7a18ac9a9415a10a7aed2211f7af7a9e85bcc90","execution":"SUCCESS","sourceSha256":"53BF3F93984F126CD1CD1084E0E62B18FD9A14AEC99F3639353EFDFFDF7198AF"}
+  "network":"Studionet",
+  "chainId":61999,
+  "signer":"0x79b3Ecbe6a65beE93b2Fcda78e6909892671507F",
+  "agreement":{"address":"0xb39c2AcedeDD1D99809D6084f2a99Dd3E6FdCB97","sourceSha256":"4D1DC32EB88840F23573BDD9A8DE5D5561BD7CF55086293906D6D067AB598AF8","deploymentExecution":"SUCCESS","readback":"FAILED: get_agreement execution error; constructor state was not initialized"},
+  "vault":{"address":"0x3C2c98F669Aa7c47596980437a534362661B1830","sourceSha256":"748F1165E33575B4B20C50020387EDCAF316CB29AFD8A822BFDCCCFF8E8F23C6","deploymentExecution":"SUCCESS","readback":"NOT RUN: agreement constructor state invalid"},
+  "status":"NOT_READY",
+  "blocker":"Fresh deployment receipt reported SUCCESS but authoritative Agreement readback failed because constructor state was not initialized; do not use these addresses as final proof."
 }
