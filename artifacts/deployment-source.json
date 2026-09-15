@@ -2,16 +2,65 @@
   "network": "Studionet",
   "chainId": 61999,
   "signer": "0x79b3Ecbe6a65beE93b2Fcda78e6909892671507F",
-  "evidence": [
-    {
-      "path": "contracts/wearseal_agreement.py",
-      "bytes": 8287,
-      "sha256": "4d1dc32eb88840f23573bdd9a8de5d5561bd7cf55086293906d6d067ab598af8"
+  "evidence": {
+    "sources": [
+      {
+        "path": "contracts/wearseal_agreement.py",
+        "bytes": 9047,
+        "sha256": "44504bd56fc69c04a380f92f798f8fe6ce0f7a719f596feea21e760bfcae704a"
+      },
+      {
+        "path": "contracts/wearseal_vault.py",
+        "bytes": 2062,
+        "sha256": "42c980731599f317d7b887df3636221544342d353b62d4dfa8024999ebfab18e"
+      }
+    ],
+    "agreement": {
+      "address": "0x945A5ED65cA5F091541d6582B76D81872597C44E",
+      "tx": "0x1176d2b945ff98360e825c5e0974ef0e0de15b0304bdca95da866c52cfc66874",
+      "execution": "SUCCESS",
+      "sourceSha256": "44504bd56fc69c04a380f92f798f8fe6ce0f7a719f596feea21e760bfcae704a"
     },
-    {
-      "path": "contracts/wearseal_vault.py",
-      "bytes": 1530,
-      "sha256": "748f1165e33575b4b20c50020387edcaf316cb29afd8a822bfdcccff8e8f23c6"
+    "vault": {
+      "address": "0x91C57bA3c2F39fc30aea8f625a34ba12f2591Aee",
+      "tx": "0x9e06f5a40f8d4916328a2b8b09914ff9e3c39ceb33c689ec609b9f5fd0389d1c",
+      "execution": "SUCCESS",
+      "sourceSha256": "42c980731599f317d7b887df3636221544342d353b62d4dfa8024999ebfab18e"
+    },
+    "binding": {
+      "tx": "0xfedb66b838ee44f8004fc82ff341cd53187e616f62ec1554e616557c8b2b4e67",
+      "execution": "SUCCESS"
+    },
+    "readback": {
+      "agreement": {
+        "checkout_hash": "0xf3848354e30a260b830f712e456599267547be13eb35a07fd598760e2abf0db5",
+        "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.svg",
+        "damage_level": "",
+        "damage_regions": [],
+        "deadline": 9999999999,
+        "definition_hash": "",
+        "deposit": 1000000000000000,
+        "item_label": "WearSeal demo camera",
+        "material_bps": 10000,
+        "minor_bps": 1500,
+        "new_damage_present": "",
+        "owner": "0x79b3ecbe6a65bee93b2fcda78e6909892671507f",
+        "reason": "",
+        "reinspection_count": 0,
+        "renter": "0x53c89d18c2951c4df149d08217f5b5e2cf1a51c0",
+        "return_hash": "",
+        "return_url": "",
+        "rubric": "Normal wear is acceptable; scratches are minor; cracks or missing parts are material.",
+        "same_item_confidence": "",
+        "serial_hash": "fixture-serial-hash",
+        "status": "DRAFT",
+        "verdict": ""
+      },
+      "vault": {
+        "agreement": "0x945a5ed65ca5f091541d6582b76d81872597c44e",
+        "credited": 0,
+        "settled": false
+      }
     }
-  ]
+  }
 }

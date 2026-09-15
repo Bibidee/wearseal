@@ -1,24 +1,39 @@
 # v0.2.18
 # { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
 from genlayer import *
+@gl.contract_interface
+class Agreement:
+    class View:
+        def get_agreement(self)->dict: ...
+        def settlement_instruction(self)->dict: ...
+    class Write:
+        def mark_funded(self)->None: ...
+        def mark_settled(self)->None: ...
+@gl.evm.contract_interface
+class Recipient:
+    class View: pass
+    class Write: pass
 class WearsealVault(gl.Contract):
-    def __init__(self,agreement_contract): self.agreement_contract=agreement_contract;self.credited=0;self.settled=False
-    @gl.public.write
+    agreement_contract:Address
+    credited:u256
+    settled:bool
+    def __init__(self,agreement_contract): self.agreement_contract=Address(str(agreement_contract));self.credited=u256(0);self.settled=False
+    @gl.public.write.payable
     def deposit(self):
         assert self.credited==0 and gl.message.value>0
-        a=gl.contract.call(self.agreement_contract,"get_agreement");assert gl.message.sender_address==a["renter"] and gl.message.value==a["deposit"] and a["status"]=="BASELINE_ACCEPTED"
-        self.credited=gl.message.value;gl.contract.call(self.agreement_contract,"mark_funded")
+        a=Agreement(self.agreement_contract).view().get_agreement();assert gl.message.sender_address==a["renter"] and gl.message.value==a["deposit"] and a["status"]=="BASELINE_ACCEPTED"
+        self.credited=gl.message.value;Agreement(self.agreement_contract).emit(on="finalized").mark_funded()
     @gl.public.view
     def get_vault(self): return {"agreement":self.agreement_contract,"credited":self.credited,"settled":self.settled}
     @gl.public.write
     def settle(self):
         assert self.credited>0 and not self.settled
-        a=gl.contract.call(self.agreement_contract,"settlement_instruction");assert a["terminal"]
-        self.settled=True;gl.contract.call(self.agreement_contract,"mark_settled")
+        a=Agreement(self.agreement_contract).view().settlement_instruction();assert a["terminal"]
+        self.settled=True;Agreement(self.agreement_contract).emit(on="finalized").mark_settled()
         owner_amount=self.credited*a["owner_bps"]//10000;renter_amount=self.credited-owner_amount
-        gl.message.send(a["owner"],owner_amount);gl.message.send(a["renter"],renter_amount)
+        Recipient(Address(a["owner"])).emit_transfer(value=owner_amount);Recipient(Address(a["renter"])).emit_transfer(value=renter_amount)
     @gl.public.write
     def refund_cancelled(self):
         assert self.credited>0 and not self.settled
-        a=gl.contract.call(self.agreement_contract,"get_agreement");assert a["status"]=="CANCELLED"
-        self.settled=True;gl.message.send(a["renter"],self.credited)
+        a=Agreement(self.agreement_contract).view().get_agreement();assert a["status"]=="CANCELLED"
+        self.settled=True;Recipient(Address(a["renter"])).emit_transfer(value=self.credited)

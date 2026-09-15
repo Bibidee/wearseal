@@ -6,7 +6,7 @@ from hashlib import sha256
 from urllib.parse import urlsplit
 import ipaddress
 
-MAX_IMAGE_BYTES=5*1024*1024; MAX_REINSPECTIONS=2
+MAX_IMAGE_BYTES=5*1024*1024; MAX_REINSPECTIONS=2; ZERO="0x0000000000000000000000000000000000000000"
 VERDICTS=["NO_NEW_DAMAGE","NORMAL_WEAR","MINOR_DAMAGE","MATERIAL_DAMAGE","INCONCLUSIVE","UNAVAILABLE"]
 CONFIDENCE=["HIGH","MEDIUM","LOW","UNCLEAR"]
 def now(): return int(datetime.now(timezone.utc).timestamp())
@@ -30,19 +30,42 @@ def fetch_image(url,expected):
     return body if "0x"+sha256(body).hexdigest()==expected else None
 
 class WearsealAgreement(gl.Contract):
+    owner:Address
+    renter:Address
+    item_label:str
+    serial_hash:str
+    rubric:str
+    checkout_url:str
+    checkout_hash:str
+    deposit:u256
+    minor_bps:u256
+    material_bps:u256
+    deadline:u256
+    status:str
+    definition_hash:str
+    vault:Address
+    return_url:str
+    return_hash:str
+    verdict:str
+    reason:str
+    same_item_confidence:str
+    new_damage_present:str
+    damage_level:str
+    damage_regions:DynArray[str]
+    reinspection_count:u256
     def __init__(self,owner,renter,item_label,serial_hash,rubric,checkout_url,checkout_hash,deposit,minor_bps,material_bps,deadline):
-        assert owner!=renter and len(item_label)<=120 and len(serial_hash)<=128 and len(rubric)<=1200 and safe_url(checkout_url) and hash_ok(checkout_hash) and deposit>0 and 0<=minor_bps<=3000 and minor_bps<=material_bps<=10000 and deadline>now()
-        self.owner=owner;self.renter=renter;self.item_label=item_label;self.serial_hash=serial_hash;self.rubric=rubric;self.checkout_url=checkout_url;self.checkout_hash=checkout_hash;self.deposit=deposit;self.minor_bps=minor_bps;self.material_bps=material_bps;self.deadline=deadline;self.status="DRAFT";self.definition_hash="";self.vault="";self.return_url="";self.return_hash="";self.verdict="";self.reason="";self.same_item_confidence="";self.new_damage_present="";self.damage_level="";self.damage_regions=[];self.reinspection_count=0
+        if owner==renter or len(item_label)>120 or len(serial_hash)>128 or len(rubric)>1200 or not safe_url(checkout_url) or not hash_ok(checkout_hash) or deposit<=0 or minor_bps>3000 or minor_bps>material_bps or material_bps>10000 or deadline<=now(): raise gl.vm.UserError("invalid agreement constructor")
+        self.owner=Address(str(owner));self.renter=Address(str(renter));self.item_label=str(item_label);self.serial_hash=str(serial_hash);self.rubric=str(rubric);self.checkout_url=str(checkout_url);self.checkout_hash=str(checkout_hash);self.deposit=u256(deposit);self.minor_bps=u256(minor_bps);self.material_bps=u256(material_bps);self.deadline=u256(deadline);self.status="DRAFT";self.definition_hash="";self.vault=Address("0x0000000000000000000000000000000000000000");self.return_url="";self.return_hash="";self.verdict="";self.reason="";self.same_item_confidence="";self.new_damage_present="";self.damage_level="";self.damage_regions=[];self.reinspection_count=u256(0)
     @gl.public.view
     def get_agreement(self): return {"owner":self.owner,"renter":self.renter,"item_label":self.item_label,"serial_hash":self.serial_hash,"rubric":self.rubric,"checkout_url":self.checkout_url,"checkout_hash":self.checkout_hash,"deposit":self.deposit,"minor_bps":self.minor_bps,"material_bps":self.material_bps,"deadline":self.deadline,"status":self.status,"definition_hash":self.definition_hash,"return_url":self.return_url,"return_hash":self.return_hash,"verdict":self.verdict,"reason":self.reason,"same_item_confidence":self.same_item_confidence,"new_damage_present":self.new_damage_present,"damage_level":self.damage_level,"damage_regions":self.damage_regions,"reinspection_count":self.reinspection_count}
     @gl.public.write
-    def bind_vault(self,vault): assert gl.message.sender_address==self.owner and not self.vault;self.vault=vault
+    def bind_vault(self,vault): assert gl.message.sender_address==self.owner and str(self.vault).lower()==ZERO and str(vault).lower()!=ZERO;self.vault=Address(str(vault))
     @gl.public.write
     def accept_baseline(self,definition_hash):
         assert gl.message.sender_address==self.renter and self.status=="DRAFT" and hash_ok(definition_hash);self.definition_hash=definition_hash;self.status="BASELINE_PENDING"
         def leader():return {"ok":fetch_image(self.checkout_url,self.checkout_hash) is not None}
         def validator(x):return isinstance(x,gl.vm.Return) and x.calldata.get("ok")== (fetch_image(self.checkout_url,self.checkout_hash) is not None)
-        result=gl.vm.run_nondet_unsafe(leader,validator);assert result.calldata["ok"];self.status="BASELINE_ACCEPTED"
+        result=gl.vm.run_nondet_unsafe(leader,validator);assert result["ok"];self.status="BASELINE_ACCEPTED"
     @gl.public.write
     def mark_funded(self):assert gl.message.sender_address==self.vault and self.status=="BASELINE_ACCEPTED";self.status="FUNDED"
     @gl.public.write
@@ -62,7 +85,7 @@ class WearsealAgreement(gl.Contract):
             if a is None or b is None:return c.get("verdict")=="UNAVAILABLE"
             other=gl.nondet.exec_prompt(prompt,images=[a,b],response_format="json")
             return all(other.get(k)==c.get(k) for k in ["verdict","same_item","new_damage_present","damage_level"])
-        result=gl.vm.run_nondet_unsafe(leader,validator);c=result.calldata;self.reinspection_count+=1;self.same_item_confidence=c.get("same_item_confidence");self.new_damage_present=c.get("new_damage_present");self.damage_level=c.get("damage_level");self.damage_regions=c.get("damage_regions",[])[:5];self.reason=c.get("observations","")[:500];self.verdict=c.get("verdict")
+        result=gl.vm.run_nondet_unsafe(leader,validator);c=result;self.reinspection_count+=1;self.same_item_confidence=c.get("same_item_confidence");self.new_damage_present=c.get("new_damage_present");self.damage_level=c.get("damage_level");self.damage_regions=c.get("damage_regions",[])[:5];self.reason=c.get("observations","")[:500];self.verdict=c.get("verdict")
         if self.same_item_confidence in ["LOW","UNCLEAR"] or c.get("same_item")!="YES" or self.verdict in ["INCONCLUSIVE","UNAVAILABLE"]:self.verdict="INCONCLUSIVE" if self.reinspection_count<MAX_REINSPECTIONS else "UNAVAILABLE"
         self.status="RETURN_SUBMITTED" if self.verdict in ["INCONCLUSIVE","UNAVAILABLE"] and self.reinspection_count<MAX_REINSPECTIONS else "DECIDED"
     @gl.public.write
