@@ -529,7 +529,7 @@
     "creditedAfterSettlement": "0"
   },
   "repeatSettlement": {
-    "hash": "0xc8483b7a86ba6a4ff3f29197ec4b321aebd2cc31c0ab1031cad69f213f5f766a",
+    "hash": "0x5a265d31d25008c89c259d035e5b2ba5dc6f9104d0c80d5bcfbd9933d2a1a76c",
     "execution": "ERROR",
     "stateUnchanged": true
   },
@@ -539,5 +539,40 @@
     "same_item_confidence": "HIGH",
     "new_damage_present": "YES",
     "damage_level": "MINOR"
+  },
+  "finalReadback": {
+    "agreement": {
+      "checkout_hash": "0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb",
+      "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
+      "damage_level": "MINOR",
+      "damage_regions": [
+        "center_circle"
+      ],
+      "deadline": 1790202911,
+      "definition_hash": "0x2fa3d4cc22088f271bb624c6ec6e54bddfa27cfce8d87fbac07f44a36c620055",
+      "deposit": 1000000000000000,
+      "item_label": "WearSeal demo camera",
+      "material_bps": 10000,
+      "minor_bps": 1500,
+      "new_damage_present": "YES",
+      "owner": "0x79b3ecbe6a65bee93b2fcda78e6909892671507f",
+      "reason": "A new red scratch is visible across the central dark circle in the return image.",
+      "reinspection_count": 1,
+      "renter": "0x53c89d18c2951c4df149d08217f5b5e2cf1a51c0",
+      "return_hash": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d",
+      "return_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/return.png",
+      "rubric": "Normal wear is acceptable; scratches are minor; cracks or missing parts are material.",
+      "same_item": "YES",
+      "same_item_confidence": "HIGH",
+      "serial_hash": "fixture-serial-hash",
+      "status": "SETTLED",
+      "vault": "0x9218eb35ff77768fdc91c2a094fd01f454079afb",
+      "verdict": "MINOR_DAMAGE"
+    },
+    "vault": {
+      "agreement": "0x08d32d24377a4bceccc3b9e2aac7f94493212ccf",
+      "credited": "0",
+      "settled": true
+    }
   }
 }
