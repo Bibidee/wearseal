@@ -43,7 +43,8 @@ async function deploy(path, args, label) {
 const renter = process.env.WEARSEAL_RENTER_ADDRESS || '0x0000000000000000000000000000000000000001';
 const checkoutUrl = process.env.WEARSEAL_CHECKOUT_URL || 'https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png';
 const checkoutHash = process.env.WEARSEAL_CHECKOUT_HASH || '0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb';
-const agreement = await deploy('contracts/wearseal_agreement.py', [account.address, renter, 'WearSeal demo camera', 'fixture-serial-hash', 'Normal wear is acceptable; scratches are minor; cracks or missing parts are material.', checkoutUrl, checkoutHash, 1000000000000000n, 1500, 10000, 9999999999n], 'agreement');
+const deadline = BigInt(process.env.WEARSEAL_DEADLINE || Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60);
+const agreement = await deploy('contracts/wearseal_agreement.py', [account.address, renter, 'WearSeal demo camera', 'fixture-serial-hash', 'Normal wear is acceptable; scratches are minor; cracks or missing parts are material.', checkoutUrl, checkoutHash, 1000000000000000n, 1500, 10000, deadline], 'agreement');
 const vault = await deploy('contracts/wearseal_vault.py', [agreement], 'vault');
 const bindTx = await client.writeContract({ address: agreement, functionName: 'bind_vault', args: [vault] });
 await finalized(bindTx, 'bind_vault');

@@ -2,7 +2,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
 import {readAgreement,readVault,requireAddress} from '../lib/genlayer/contracts';
-import {addresses} from '../lib/genlayer/contracts';
 import {submitAndConfirm,TxState} from '../lib/genlayer/transaction';
 import {useWallet} from '../lib/wallet/provider';
 
@@ -10,8 +9,8 @@ type Action='accept'|'fund'|'return'|'inspect'|'receipt';
 export default function LiveRoute({id,action}:{id:string;action:Action}){
   const wallet=useWallet(); const [agreement,setAgreement]=useState<any>(); const [vault,setVault]=useState<any>(); const [value,setValue]=useState(''); const [hash,setHash]=useState(''); const [tx,setTx]=useState<TxState>({phase:'IDLE'}); const [error,setError]=useState('');
   const agreementAddress=useMemo(()=>{try{return requireAddress(id,'Agreement')}catch{return ''}},[id]);
-  const vaultAddress=useMemo(()=>{try{return requireAddress(addresses.vault,'Vault')}catch{return ''}},[]);
-  const refresh=async()=>{if(!agreementAddress)return false;const [a,v]=await Promise.all([readAgreement(agreementAddress),vaultAddress?readVault(vaultAddress):Promise.resolve(null)]);setAgreement(a);setVault(v);return true};
+  const vaultAddress=(()=>{try{return agreement?.vault?requireAddress(String(agreement.vault),'Vault'):''}catch{return ''}})();
+  const refresh=async()=>{if(!agreementAddress)return false;const a=await readAgreement(agreementAddress);const v=a?.vault?await readVault(requireAddress(String(a.vault),'Vault')):null;setAgreement(a);setVault(v);return true};
   useEffect(()=>{void refresh().catch(e=>setError(String(e)));},[agreementAddress]);
   const run=async()=>{try{setError('');if(!wallet?.client)throw Error('Connect a Studionet wallet first.');if(!wallet.onStudionet)throw Error('Switch wallet to Studionet 61999.');if(!agreementAddress)throw Error('Enter a valid Agreement address.');const call:any=action==='accept'?{address:agreementAddress,functionName:'accept_baseline',args:[value]}:action==='fund'?{address:vaultAddress,functionName:'deposit',args:[],value:BigInt(agreement.deposit)}:action==='return'?{address:agreementAddress,functionName:'submit_return',args:[value,hash]}:action==='inspect'?{address:agreementAddress,functionName:'inspect',args:[]}:null;if(!call)throw Error('This page is read-only.');await submitAndConfirm(wallet.client,call,refresh,setTx);}catch(e){setError(e instanceof Error?e.message:String(e));}};
   const title={accept:'Accept the exact passport.',fund:'Deposit the exact security.',return:'Pin the return.',inspect:'Compare the exact pair.',receipt:'Settlement receipt.'}[action];

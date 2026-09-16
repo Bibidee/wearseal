@@ -4,4 +4,6 @@ WearSeal is a browser-to-GenLayer Studionet (61999) equipment-condition escrow. 
 
 Run with `npm ci && npm run dev`. Configure public contract addresses in `.env.local` after a real Studionet deployment. The `/verify` tool fetches and hashes public evidence; it never treats a local `blob:` URL as adjudication evidence.
 
+The final Studionet deployment and lifecycle evidence is recorded in [`artifacts/final-deployment.json`](artifacts/final-deployment.json).
+
 Known limits: this is a Studionet demo protocol. It does not prove hidden damage, item identity beyond the visual comparison, legal enforceability, or insurance-grade inspection.

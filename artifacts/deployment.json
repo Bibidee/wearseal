@@ -1,9 +1,0 @@
-{
-  "network":"Studionet",
-  "chainId":61999,
-  "signer":"0x79b3Ecbe6a65beE93b2Fcda78e6909892671507F",
-  "agreement":{"address":"0xb39c2AcedeDD1D99809D6084f2a99Dd3E6FdCB97","sourceSha256":"4D1DC32EB88840F23573BDD9A8DE5D5561BD7CF55086293906D6D067AB598AF8","deploymentExecution":"SUCCESS","readback":"FAILED: get_agreement execution error; constructor state was not initialized"},
-  "vault":{"address":"0x3C2c98F669Aa7c47596980437a534362661B1830","sourceSha256":"748F1165E33575B4B20C50020387EDCAF316CB29AFD8A822BFDCCCFF8E8F23C6","deploymentExecution":"SUCCESS","readback":"NOT RUN: agreement constructor state invalid"},
-  "status":"NOT_READY",
-  "blocker":"Fresh deployment receipt reported SUCCESS but authoritative Agreement readback failed because constructor state was not initialized; do not use these addresses as final proof."
-}

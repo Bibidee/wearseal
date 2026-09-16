@@ -1,0 +1,85 @@
+{
+  "network": "Studionet",
+  "chainId": 61999,
+  "sourceHashes": {
+    "agreement": "1d497ad0cbae341c67454995639cb468868924746ce7b3d7c4bd06fc49320e66",
+    "vault": "83fe480b9bac095513700b7d7033c509800fd30cdc4fe7887e08c958d052b4d0"
+  },
+  "addresses": {
+    "agreement": "0x52eD71F54CbFB415E01cda3A74aC397824eA46a2",
+    "vault": "0xC4747E4625E08Bbc0E0B3d9aE966237730183aC3"
+  },
+  "lifecycle": {
+    "network": "Studionet",
+    "chainId": 61999,
+    "owner": "0x79b3Ecbe6a65beE93b2Fcda78e6909892671507F",
+    "renter": "0x53C89d18C2951C4df149d08217f5b5E2Cf1A51C0",
+    "agreement": "0x52eD71F54CbFB415E01cda3A74aC397824eA46a2",
+    "vault": "0xC4747E4625E08Bbc0E0B3d9aE966237730183aC3",
+    "txs": {
+      "deployAgreement": "0xda8798948d6b2a19dd06dd34ca3a6d05d2b6b56aa57f820a088fb8e11069db96",
+      "deployVault": "0x5468b13a67552a5dff2ea3b2dca20393715eba372ac2764802cf34a6e47962f6",
+      "bindVault": "0x77f21c64f70930b9c94fed352e3cc2f4ba71221b771dd7fe40db508f5b59a206",
+      "acceptBaseline": "0xcf798d7d6b051956f92f9c30ab1ed074129e7a56668c3ea94cf3769f5f2d401f",
+      "deposit": "0x95bc04ff0e65a5792d2f90cbbec9e007816b2a8843dea4c29b769b3591a8ef51",
+      "submitReturn": "0x863d7886a78713fd8317b78078f99cce22a09fab2eadf0879c4da2aa7f335770",
+      "inspect": "0x74d898f785fedb892913ff1ec7252789cba15553479fc17d718e524f51b8759b",
+      "settle": "0x8bc0af2b89e4a08d93e82a718fd01eb982fbe216a93314adf171d204b3481bde",
+      "repeatSettle": "0xc0ed17ca1af5b4b81b0feca589bf3efa813473521c9c261e9a98e882c75c31a5"
+    },
+    "readback": {
+      "agreement": {
+        "checkout_hash": "0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb",
+        "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
+        "damage_level": "MINOR",
+        "damage_regions": [
+          "diagonal scratch across the front face of the item, extending from left to right center"
+        ],
+        "deadline": 1790117484,
+        "definition_hash": "0x66ff17a4fd313d060a5608bfc5ce4d40bce8d66b16b0b5f4a62a18237d5e6ce0",
+        "deposit": 1000000000000000,
+        "item_label": "WearSeal demo camera",
+        "material_bps": 10000,
+        "minor_bps": 1500,
+        "new_damage_present": "UNCLEAR",
+        "owner": "0x79b3ecbe6a65bee93b2fcda78e6909892671507f",
+        "reason": "",
+        "reinspection_count": 1,
+        "renter": "0x53c89d18c2951c4df149d08217f5b5e2cf1a51c0",
+        "return_hash": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d",
+        "return_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/return.png",
+        "rubric": "Normal wear is acceptable; scratches are minor; cracks or missing parts are material.",
+        "same_item_confidence": "HIGH",
+        "serial_hash": "fixture-serial-hash",
+        "status": "DECIDED",
+        "vault": "0xc4747e4625e08bbc0e0b3d9ae966237730183ac3",
+        "verdict": "MINOR_DAMAGE"
+      },
+      "vault": {
+        "agreement": "0x52ed71f54cbfb415e01cda3a74ac397824ea46a2",
+        "credited": 0,
+        "settled": true
+      }
+    }
+  },
+  "statesAfter": {
+    "acceptBaseline": "BASELINE_ACCEPTED",
+    "deposit": "FUNDED",
+    "submitReturn": "RETURN_SUBMITTED",
+    "inspect": "DECIDED",
+    "settle": "SETTLED"
+  },
+  "economics": {
+    "deposit": "1000000000000000",
+    "minorOwnerPayout": "150000000000000",
+    "renterRefund": "850000000000000",
+    "creditedAfterSettlement": "0"
+  },
+  "repeatSettlement": {
+    "hash": "0xc0ed17ca1af5b4b81b0feca589bf3efa813473521c9c261e9a98e882c75c31a5",
+    "execution": "ERROR",
+    "stateUnchanged": true
+  },
+  "semanticVerdict": "MINOR_DAMAGE",
+  "sameItemConfidence": "HIGH"
+}

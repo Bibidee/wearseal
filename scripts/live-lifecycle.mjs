@@ -4,7 +4,9 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { createClient, createAccount } from 'genlayer-js';
 import { studionet } from 'genlayer-js/chains';
 
-const keytar = createRequire(import.meta.url)('C:/Users/ojiku/AppData/Roaming/npm/node_modules/genlayer/node_modules/keytar');
+const keytarModule = process.env.GENLAYER_KEYTAR_MODULE;
+if (!keytarModule) throw new Error('Set GENLAYER_KEYTAR_MODULE or provide private keys through the unlocked CLI environment.');
+const keytar = createRequire(import.meta.url)(keytarModule);
 const service = process.env.GENLAYER_KEYTAR_SERVICE || 'genlayer-cli';
 const ownerKey = await keytar.getPassword(service, process.env.GENLAYER_OWNER_ACCOUNT || 'account:faultline-dev');
 const renterKey = await keytar.getPassword(service, process.env.GENLAYER_RENTER_ACCOUNT || 'account:signalbond-challenger-unlocked2');
@@ -16,11 +18,12 @@ const vault = process.env.WEARSEAL_VAULT_ADDRESS;
 if (!agreement || !vault) throw new Error('WEARSEAL_AGREEMENT_ADDRESS and WEARSEAL_VAULT_ADDRESS are required.');
 const ownerClient = createClient({ chain: studionet, account: owner });
 const renterClient = createClient({ chain: studionet, account: renter });
-const definitionHash = '0x' + createHash('sha256').update(`${agreement}:WearSeal demo camera:fixture-serial-hash`).digest('hex');
+const definitionHash = await renterClient.readContract({ address: agreement, functionName: 'canonical_definition_hash', args: [] });
 const returnUrl = process.env.WEARSEAL_RETURN_URL || 'https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/return.png';
 const returnHash = process.env.WEARSEAL_RETURN_HASH || '0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d';
 const deposit = 1000000000000000n;
 const txs = {};
+let inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
 
 async function write(client, address, functionName, args = [], value) {
   const hash = await client.writeContract({ address, functionName, args, ...(value === undefined ? {} : { value }) });
@@ -31,16 +34,20 @@ async function write(client, address, functionName, args = [], value) {
   return hash;
 }
 
-txs.acceptBaseline = await write(renterClient, agreement, 'accept_baseline', [definitionHash]);
-txs.deposit = await write(renterClient, vault, 'deposit', [], deposit);
-txs.submitReturn = await write(renterClient, agreement, 'submit_return', [returnUrl, returnHash]);
-txs.inspect = await write(ownerClient, agreement, 'inspect');
-let inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
+if (inspected.status === 'DRAFT') txs.acceptBaseline = await write(renterClient, agreement, 'accept_baseline', [definitionHash]);
+inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
+if (inspected.status === 'BASELINE_ACCEPTED') txs.deposit = await write(renterClient, vault, 'deposit', [], deposit);
+if (txs.deposit) await new Promise(resolve => setTimeout(resolve, 5000));
+inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
+if (inspected.status === 'FUNDED' || inspected.status === 'ACTIVE') txs.submitReturn = await write(renterClient, agreement, 'submit_return', [returnUrl, returnHash]);
+inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
+if (inspected.status === 'RETURN_SUBMITTED') txs.inspect = await write(ownerClient, agreement, 'inspect');
+inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
 if (inspected.status === 'RETURN_SUBMITTED') {
   txs.inspectRetry = await write(ownerClient, agreement, 'inspect');
   inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
 }
-txs.settle = await write(ownerClient, vault, 'settle');
+if (inspected.status === 'DECIDED') txs.settle = await write(ownerClient, vault, 'settle');
 const readback = {
   agreement: await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] }),
   vault: await ownerClient.readContract({ address: vault, functionName: 'get_vault', args: [] })
