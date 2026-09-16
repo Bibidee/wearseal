@@ -2,7 +2,39 @@
   "name": "wearseal",
   "private": true,
   "version": "0.1.0",
-  "scripts": {"dev":"next dev","build":"next build","start":"next start","lint":"eslint app components lib tests --ext .ts,.tsx","typecheck":"tsc --noEmit","test":"vitest run","contract-test":"python -m pytest tests/contract","compile-contracts":"python -m py_compile contracts/wearseal_agreement.py contracts/wearseal_vault.py","deploy:studionet":"node scripts/deploy-studionet.mjs","deploy:vault":"node scripts/deploy-vault.mjs"},
-  "dependencies": {"framer-motion":"13.2.0","genlayer-js":"1.1.8","lucide-react":"1.41.0","next":"16.3.3","react":"19.2.0","react-dom":"19.2.0","viem":"2.56.3","zod":"3.25.76"},
-  "devDependencies": {"@tailwindcss/postcss":"4.1.16","@types/node":"26.4.1","@types/react":"19.2.18","@types/react-dom":"19.2.7","eslint":"9.39.5","eslint-config-next":"16.3.3","jsdom":"30.0.1","tailwindcss":"4.1.16","typescript":"6.0.3","vitest":"5.0.0"}
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint app components lib tests --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "contract-test": "python -m pytest tests/contract",
+    "compile-contracts": "python -m py_compile contracts/wearseal_agreement.py contracts/wearseal_vault.py",
+    "deploy:studionet": "node scripts/deploy-studionet.mjs",
+    "deploy:vault": "node scripts/deploy-vault.mjs"
+  },
+  "dependencies": {
+    "framer-motion": "13.2.0",
+    "genlayer-js": "1.1.8",
+    "lucide-react": "1.41.0",
+    "next": "16.3.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "viem": "2.56.3",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.16",
+    "@types/node": "26.4.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.3",
+    "jsdom": "30.0.1",
+    "tailwindcss": "4.1.16",
+    "typescript": "6.0.3",
+    "vite": "^7.1.7",
+    "vitest": "5.0.0"
+  }
 }
