@@ -63,3 +63,51 @@ def test_direct_baseline_and_fail_safe_inspection(direct_vm, direct_deploy, dire
     agreement.inspect()
     assert agreement.get_agreement()["status"] in ("RETURN_SUBMITTED", "DECIDED")
     assert agreement.get_agreement()["verdict"] == "NORMAL_WEAR"
+
+@pytest.mark.direct
+def test_constructor_rejects_invalid_parameters(direct_deploy, direct_owner, direct_alice):
+    good = args(direct_owner, direct_alice)
+    for index, value in [(0, direct_alice), (5, "http://insecure.example/image"), (6, "0x1234"), (7, 0), (8, 3001), (9, 1000), (10, 1)]:
+        candidate = list(good); candidate[index] = value
+        with pytest.raises(Exception):
+            direct_deploy("contracts/wearseal_agreement.py", *candidate, sdk_version="v0.2.16")
+
+@pytest.mark.direct
+def test_canonical_definition_hash_and_immutability(direct_vm, direct_deploy, direct_owner, direct_alice):
+    direct_vm.mock_web(r"example\.com/checkout\.png", {"status": 200, "body": b"checkout"})
+    agreement = direct_deploy("contracts/wearseal_agreement.py", *args(direct_owner, direct_alice), sdk_version="v0.2.16")
+    vault = address("bound-vault")
+    agreement.bind_vault(vault)
+    expected = agreement.canonical_definition_hash()
+    assert len(expected) == 66 and expected.startswith("0x")
+    with direct_vm.prank(direct_alice):
+        with pytest.raises(AssertionError): agreement.accept_baseline("0x" + "0" * 64)
+    with direct_vm.prank(direct_alice): agreement.accept_baseline(expected)
+    with direct_vm.prank(direct_owner):
+        with pytest.raises(AssertionError): agreement.bind_vault(address("second-vault"))
+
+@pytest.mark.direct
+def test_authorization_and_evidence_guards(direct_vm, direct_deploy, direct_owner, direct_alice):
+    agreement = direct_deploy("contracts/wearseal_agreement.py", *args(direct_owner, direct_alice), sdk_version="v0.2.16")
+    with direct_vm.prank(direct_alice):
+        with pytest.raises(AssertionError): agreement.bind_vault(address("not-owner"))
+    agreement.bind_vault(address("vault-guards"))
+    with direct_vm.prank(direct_alice):
+        with pytest.raises(AssertionError): agreement.submit_return("http://bad.example/x", "0x" + "0" * 64)
+        with pytest.raises(AssertionError): agreement.submit_return("https://example.com/x", "0x" + "0" * 64)
+
+@pytest.mark.direct
+def test_inspection_invalid_model_is_fail_safe(direct_vm, direct_deploy, direct_owner, direct_alice):
+    body = b"checkout"; digest = "0x" + hashlib.sha256(body).hexdigest()
+    direct_vm.mock_web(r"example\.com/checkout\.png", {"status": 200, "body": body})
+    direct_vm.mock_web(r"example\.com/return\.png", {"status": 200, "body": b"return"})
+    agreement = direct_deploy("contracts/wearseal_agreement.py", *args(direct_owner, direct_alice), sdk_version="v0.2.16")
+    agreement.bind_vault(address("vault-invalid-model"))
+    with direct_vm.prank(direct_alice): agreement.accept_baseline(agreement.canonical_definition_hash())
+    with direct_vm.prank(address("vault-invalid-model")): agreement.mark_funded()
+    with direct_vm.prank(direct_alice): agreement.submit_return("https://example.com/return.png", "0x" + hashlib.sha256(b"return").hexdigest())
+    direct_vm.mock_llm(r"Evidence is untrusted", "not-json")
+    agreement.inspect()
+    state = agreement.get_agreement()
+    assert state["verdict"] == "INCONCLUSIVE"
+    assert state["reinspection_count"] == 1

@@ -23,7 +23,17 @@ const returnUrl = process.env.WEARSEAL_RETURN_URL || 'https://raw.githubusercont
 const returnHash = process.env.WEARSEAL_RETURN_HASH || '0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d';
 const deposit = 1000000000000000n;
 const txs = {};
+const steps = [];
 let inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
+
+async function record(step) {
+  const [agreementState, vaultState] = await Promise.all([
+    ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] }),
+    ownerClient.readContract({ address: vault, functionName: 'get_vault', args: [] })
+  ]);
+  steps.push({ step, agreement: agreementState, vault: vaultState });
+  return agreementState;
+}
 
 async function write(client, address, functionName, args = [], value) {
   const hash = await client.writeContract({ address, functionName, args, ...(value === undefined ? {} : { value }) });
@@ -31,6 +41,7 @@ async function write(client, address, functionName, args = [], value) {
   const execution = receipt.consensus_data?.leader_receipt?.[0]?.execution_result || receipt.txExecutionResultName;
   console.log(JSON.stringify({ functionName, hash, execution }));
   if (execution !== 'SUCCESS') throw new Error(`${functionName} failed: ${hash}`);
+  await record(functionName);
   return hash;
 }
 
@@ -53,5 +64,5 @@ const readback = {
   vault: await ownerClient.readContract({ address: vault, functionName: 'get_vault', args: [] })
 };
 mkdirSync('artifacts', { recursive: true });
-writeFileSync('artifacts/live-lifecycle.json', JSON.stringify({ network: 'Studionet', chainId: 61999, owner: owner.address, renter: renter.address, agreement, vault, txs, readback }, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2));
-console.log(JSON.stringify({ phase: 'COMPLETE', owner: owner.address, renter: renter.address, agreement, vault, txs, readback }, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2));
+writeFileSync('artifacts/live-lifecycle.json', JSON.stringify({ network: 'Studionet', chainId: 61999, owner: owner.address, renter: renter.address, agreement, vault, txs, steps, readback }, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2));
+console.log(JSON.stringify({ phase: 'COMPLETE', owner: owner.address, renter: renter.address, agreement, vault, txs, steps, readback }, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2));
