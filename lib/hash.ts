@@ -1,2 +1,3 @@
 export async function sha256Hex(file:Blob){const bytes=await file.arrayBuffer();const digest=await crypto.subtle.digest('SHA-256',bytes);return `0x${[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}`}
-export async function fetchAndHash(url:string){const r=await fetch(url);if(!r.ok)throw new Error(`Fetch failed: ${r.status}`);return sha256Hex(await r.blob())}
+export async function fetchAndHash(url:string){const r=await fetch(url);if(!r.ok)throw new Error(`Fetch failed: ${r.status}`);const bytes=await r.arrayBuffer();if(!bytes.byteLength)throw new Error('Evidence body is empty.');if(bytes.byteLength>5*1024*1024)throw new Error('Evidence exceeds 5 MB.');return sha256Hex(new Blob([bytes]))}
+export async function verifyEvidence(local:Blob,url:string){const localHash=await sha256Hex(local);const remoteHash=await fetchAndHash(url);return {localHash,remoteHash,match:localHash===remoteHash}}

@@ -20,7 +20,7 @@ const evidence = { sources: files.map(path => ({ path, bytes: readFileSync(path)
 async function finalized(hash, label) {
   const receipt = await client.waitForTransactionReceipt({ hash, status: 'FINALIZED', retries: 220, interval: 5000 });
   const execution = receipt.consensus_data?.leader_receipt?.[0]?.execution_result || receipt.txExecutionResultName;
-  if (execution !== 'SUCCESS') throw new Error(`${label} execution failed: ${hash}`);
+  if (!/SUCCESS|FINISHED_WITH_RETURN/i.test(String(execution)) || /ERROR|FAILED/i.test(String(execution))) throw new Error(`${label} execution failed: ${hash}`);
   return receipt;
 }
 
