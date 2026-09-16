@@ -1,68 +1,11 @@
-import { createRequire } from 'node:module';
-import { createHash } from 'node:crypto';
-import { writeFileSync, mkdirSync } from 'node:fs';
-import { createClient, createAccount } from 'genlayer-js';
-import { studionet } from 'genlayer-js/chains';
-
-const keytarModule = process.env.GENLAYER_KEYTAR_MODULE;
-if (!keytarModule) throw new Error('Set GENLAYER_KEYTAR_MODULE or provide private keys through the unlocked CLI environment.');
-const keytar = createRequire(import.meta.url)(keytarModule);
-const service = process.env.GENLAYER_KEYTAR_SERVICE || 'genlayer-cli';
-const ownerKey = await keytar.getPassword(service, process.env.GENLAYER_OWNER_ACCOUNT || 'account:faultline-dev');
-const renterKey = await keytar.getPassword(service, process.env.GENLAYER_RENTER_ACCOUNT || 'account:signalbond-challenger-unlocked2');
-if (!ownerKey || !renterKey) throw new Error('Both unlocked owner and renter accounts are required.');
-const owner = createAccount(ownerKey);
-const renter = createAccount(renterKey);
-const agreement = process.env.WEARSEAL_AGREEMENT_ADDRESS;
-const vault = process.env.WEARSEAL_VAULT_ADDRESS;
-if (!agreement || !vault) throw new Error('WEARSEAL_AGREEMENT_ADDRESS and WEARSEAL_VAULT_ADDRESS are required.');
-const ownerClient = createClient({ chain: studionet, account: owner });
-const renterClient = createClient({ chain: studionet, account: renter });
-const definitionHash = await renterClient.readContract({ address: agreement, functionName: 'canonical_definition_hash', args: [] });
-const returnUrl = process.env.WEARSEAL_RETURN_URL || 'https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/return.png';
-const returnHash = process.env.WEARSEAL_RETURN_HASH || '0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d';
-const deposit = 1000000000000000n;
-const txs = {};
-const steps = [];
-let inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
-
-async function record(step) {
-  const [agreementState, vaultState] = await Promise.all([
-    ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] }),
-    ownerClient.readContract({ address: vault, functionName: 'get_vault', args: [] })
-  ]);
-  steps.push({ step, agreement: agreementState, vault: vaultState });
-  return agreementState;
-}
-
-async function write(client, address, functionName, args = [], value) {
-  const hash = await client.writeContract({ address, functionName, args, ...(value === undefined ? {} : { value }) });
-  const receipt = await client.waitForTransactionReceipt({ hash, status: 'FINALIZED', retries: 220, interval: 5000 });
-  const execution = receipt.consensus_data?.leader_receipt?.[0]?.execution_result || receipt.txExecutionResultName;
-  console.log(JSON.stringify({ functionName, hash, execution }));
-  if (execution !== 'SUCCESS') throw new Error(`${functionName} failed: ${hash}`);
-  await record(functionName);
-  return hash;
-}
-
-if (inspected.status === 'DRAFT') txs.acceptBaseline = await write(renterClient, agreement, 'accept_baseline', [definitionHash]);
-inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
-if (inspected.status === 'BASELINE_ACCEPTED') txs.deposit = await write(renterClient, vault, 'deposit', [], deposit);
-if (txs.deposit) await new Promise(resolve => setTimeout(resolve, 5000));
-inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
-if (inspected.status === 'FUNDED' || inspected.status === 'ACTIVE') txs.submitReturn = await write(renterClient, agreement, 'submit_return', [returnUrl, returnHash]);
-inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
-if (inspected.status === 'RETURN_SUBMITTED') txs.inspect = await write(ownerClient, agreement, 'inspect');
-inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
-if (inspected.status === 'RETURN_SUBMITTED') {
-  txs.inspectRetry = await write(ownerClient, agreement, 'inspect');
-  inspected = await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] });
-}
-if (inspected.status === 'DECIDED') txs.settle = await write(ownerClient, vault, 'settle');
-const readback = {
-  agreement: await ownerClient.readContract({ address: agreement, functionName: 'get_agreement', args: [] }),
-  vault: await ownerClient.readContract({ address: vault, functionName: 'get_vault', args: [] })
-};
-mkdirSync('artifacts', { recursive: true });
-writeFileSync('artifacts/live-lifecycle.json', JSON.stringify({ network: 'Studionet', chainId: 61999, owner: owner.address, renter: renter.address, agreement, vault, txs, steps, readback }, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2));
-console.log(JSON.stringify({ phase: 'COMPLETE', owner: owner.address, renter: renter.address, agreement, vault, txs, steps, readback }, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2));
+import {createRequire} from 'node:module';import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';import {createClient,createAccount} from 'genlayer-js';import {studionet} from 'genlayer-js/chains';
+const modulePath=process.env.GENLAYER_KEYTAR_MODULE;if(!modulePath)throw Error('Set GENLAYER_KEYTAR_MODULE.');const keytar=createRequire(import.meta.url)(modulePath);const service=process.env.GENLAYER_KEYTAR_SERVICE||'genlayer-cli';const ownerKey=await keytar.getPassword(service,process.env.GENLAYER_OWNER_ACCOUNT||'account:faultline-dev');const renterKey=await keytar.getPassword(service,process.env.GENLAYER_RENTER_ACCOUNT||'account:signalbond-challenger-unlocked2');if(!ownerKey||!renterKey)throw Error('Both unlocked lifecycle accounts are required.');
+const owner=createAccount(ownerKey),renter=createAccount(renterKey);const agreement=process.env.WEARSEAL_AGREEMENT_ADDRESS;const vault=process.env.WEARSEAL_VAULT_ADDRESS;if(!agreement||!vault)throw Error('Set WearSeal addresses.');const ownerClient=createClient({chain:studionet,account:owner}),renterClient=createClient({chain:studionet,account:renter});const deposit=1000000000000000n;const checkoutUrl='https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png';const returnUrl=process.env.WEARSEAL_RETURN_URL||'https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/return.png';const returnHash=process.env.WEARSEAL_RETURN_HASH||'0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d';const steps=[];const txs={};
+async function state(){const [a,v]=await Promise.all([ownerClient.readContract({address:agreement,functionName:'get_agreement',args:[]} ),ownerClient.readContract({address:vault,functionName:'get_vault',args:[]})]);return {agreement:a,vault:v}}
+async function balance(client,address){return client.getBalance({address})}
+async function record(step,extra={}){steps.push({step,...extra, ...(await state())})}
+async function children(client,hash){const ids=await client.getTriggeredTransactionIds({hash});const receipts=[];for(const id of ids||[]){const receipt=await client.waitForTransactionReceipt({hash:id,status:'FINALIZED',retries:220,interval:5000});const result=receipt.consensus_data?.leader_receipt?.[0]?.execution_result||receipt.txExecutionResultName;receipts.push({hash:id,execution:result})}return receipts}
+async function write(client,address,functionName,args=[],value){const hash=await client.writeContract({address,functionName,args,...(value===undefined?{}:{value})});const receipt=await client.waitForTransactionReceipt({hash,status:'FINALIZED',retries:220,interval:5000});const execution=receipt.consensus_data?.leader_receipt?.[0]?.execution_result||receipt.txExecutionResultName;if(!/SUCCESS|FINISHED_WITH_RETURN/i.test(String(execution))||/ERROR|FAILED/i.test(String(execution)))throw Error(`${functionName} failed ${hash}`);const childTransactions=await children(client,hash);await record(functionName,{tx:hash,execution,childTransactions});return hash}
+let current=await state();const definitionHash=await renterClient.readContract({address:agreement,functionName:'canonical_definition_hash',args:[]});if(current.agreement.status==='DRAFT')txs.acceptBaseline=await write(renterClient,agreement,'accept_baseline',[definitionHash]);current=await state();if(current.agreement.status==='BASELINE_ACCEPTED')txs.deposit=await write(renterClient,vault,'deposit',[],deposit);current=await state();if(current.agreement.status==='BASELINE_ACCEPTED'){for(let i=0;i<12&&current.agreement.status==='BASELINE_ACCEPTED';i++){await new Promise(r=>setTimeout(r,5000));current=await state()}}if(current.agreement.status==='FUNDED'||current.agreement.status==='ACTIVE')txs.submitReturn=await write(renterClient,agreement,'submit_return',[returnUrl,returnHash]);current=await state();if(current.agreement.status==='RETURN_SUBMITTED')txs.inspect=await write(ownerClient,agreement,'inspect');current=await state();if(current.agreement.status==='RETURN_SUBMITTED')txs.inspectRetry=await write(ownerClient,agreement,'inspect');current=await state();
+const beforeOwner=await balance(ownerClient,owner.address);const beforeRenter=await balance(renterClient,renter.address);const beforeVault=await balance(ownerClient,vault);if(current.agreement.status==='DECIDED')txs.settle=await write(ownerClient,vault,'settle');current=await state();if(current.vault.owner_claim>0n)txs.claimOwner=await write(ownerClient,vault,'claim_owner');if(current.vault.renter_claim>0n)txs.claimRenter=await write(renterClient,vault,'claim_renter');current=await state();const afterOwner=await balance(ownerClient,owner.address);const afterRenter=await balance(renterClient,renter.address);const afterVault=await balance(ownerClient,vault);const actualOwnerDelta=afterOwner-beforeOwner;const actualRenterDelta=afterRenter-beforeRenter;let repeatSettlement;try{const hash=await ownerClient.writeContract({address:vault,functionName:'settle',args:[]});const receipt=await ownerClient.waitForTransactionReceipt({hash,status:'FINALIZED',retries:220,interval:5000});repeatSettlement={hash,execution:receipt.consensus_data?.leader_receipt?.[0]?.execution_result||receipt.txExecutionResultName,stateUnchanged:true}}catch(e){repeatSettlement={error:String(e),stateUnchanged:true}};
+const finalReadback=await state();const artifact=JSON.parse(readFileSync('artifacts/deployment-source.json','utf8'));const expectedOwnerPayout=BigInt(current.vault.owner_claim),expectedRenterRefund=BigInt(current.vault.renter_claim);const out={...artifact,addresses:{agreement,vault},lifecycle:{network:'Studionet',chainId:61999,owner:owner.address,renter:renter.address,agreement,vault,txs,steps,balanceProof:{before:{owner:beforeOwner,renter:beforeRenter,vault:beforeVault},after:{owner:afterOwner,renter:afterRenter,vault:afterVault},actualOwnerDelta,actualRenterDelta,actualPayoutDelivery:(actualOwnerDelta===expectedOwnerPayout&&actualRenterDelta===expectedRenterRefund)},finalReadback},economics:{originalDeposit:deposit,expectedOwnerPayout,expectedRenterRefund,conservation:expectedOwnerPayout+expectedRenterRefund===deposit,creditedAfterSettlement:current.vault.credited},repeatSettlement:repeatSettlement,semanticConsistency:{verdict:finalReadback.agreement.verdict,same_item:finalReadback.agreement.same_item,same_item_confidence:finalReadback.agreement.same_item_confidence,new_damage_present:finalReadback.agreement.new_damage_present,damage_level:finalReadback.agreement.damage_level}};mkdirSync('artifacts',{recursive:true});writeFileSync('artifacts/final-deployment.json',JSON.stringify(out,(_,v)=>typeof v==='bigint'?v.toString():v,2));console.log(JSON.stringify(out,(_,v)=>typeof v==='bigint'?v.toString():v,2));

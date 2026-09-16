@@ -5,7 +5,7 @@ import {useWallet} from '../../lib/wallet/provider';
 import {verifyEvidence} from '../../lib/hash';
 import {validateEvidenceUrl,validSha256} from '../../lib/evidence';
 import {deadlineFromDate,defaultDeadline} from '../../lib/deadline';
-const frozenSourceCommit=process.env.NEXT_PUBLIC_SOURCE_COMMIT||'245fba5e53f6394da65e7edd627174e1b6317302';
+const frozenSourceCommit=process.env.NEXT_PUBLIC_SOURCE_COMMIT||'72b86ba';
 const base=`https://raw.githubusercontent.com/Bibidee/wearseal/${frozenSourceCommit}`;
 const agreementSource=`${base}/contracts/wearseal_agreement.py`;const vaultSource=`${base}/contracts/wearseal_vault.py`;
 const checkoutDefault='https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png';
