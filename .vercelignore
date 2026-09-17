@@ -1,9 +1,8 @@
 node_modules
 .next
 .tools
-*.tsbuildinfo
+.pytest_cache
 __pycache__
 *.pyc
 .env*
-!.env.example
-.vercel
+.git
