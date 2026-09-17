@@ -12,6 +12,7 @@
     "contract-test": "python -m pytest tests/contract",
     "compile-contracts": "python -m py_compile contracts/wearseal_agreement.py contracts/wearseal_vault.py",
     "deploy:studionet": "node scripts/deploy-studionet.mjs",
+    "diagnose:studionet": "node scripts/diagnose-studionet.mjs",
     "deploy:vault": "node scripts/deploy-vault.mjs"
   },
   "dependencies": {
