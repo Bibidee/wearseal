@@ -11,24 +11,24 @@
       },
       {
         "path": "contracts/wearseal_vault.py",
-        "bytes": 2974,
-        "sha256": "6fe1d1af3acd2b8f6b3fa00f81fa30da14d227f2fc6ea091ba760e636a6a48d1"
+        "bytes": 3480,
+        "sha256": "cd30db2ada152787493a9f56510afb335889eaf69dabf9954161da733a47be9f"
       }
     ],
     "agreement": {
-      "address": "0x65b8e0EDE78AC577aEB4e237A4d9cE653d094f6f",
-      "tx": "0xc253a8e76f48dec4745f71d3a17254a6e9fd5d6bc692f80bcc5e65311b15cfe9",
+      "address": "0x47C59B05C4dC09EF2f0Cb55b694442510cc05af8",
+      "tx": "0xf9d8b51b423f800a1a9b98078b3450a31ce59e29d4543b7369cca430e8cce11d",
       "execution": "SUCCESS",
       "sourceSha256": "9fc4b718f6745bf0a7753e3b0cefa87a339656d54db708ab5bbdd3ba88986f14"
     },
     "vault": {
-      "address": "0x0421c6Cb9d6C046aab9D3a88bAFf84ab6aBA6dcc",
-      "tx": "0x5f6d839cb6b136340854ea4ddb8d8d5589eae12afc5efb85776dde22b90a3f70",
+      "address": "0xfa80563d6c489C6058ba0a2cabE54B13A800d5B3",
+      "tx": "0xc8c2a17149eefb36f3146b5eb1ca9f8964f1b4d774a27867ffaf74640ed500c7",
       "execution": "SUCCESS",
-      "sourceSha256": "6fe1d1af3acd2b8f6b3fa00f81fa30da14d227f2fc6ea091ba760e636a6a48d1"
+      "sourceSha256": "cd30db2ada152787493a9f56510afb335889eaf69dabf9954161da733a47be9f"
     },
     "binding": {
-      "tx": "0x3ef5cae5a726fa873c1eaa35d00bab00277847ab30dc85e0790c47792008ade2",
+      "tx": "0xbf40ea13eaef65cc7c24e38093409da57d1d2afe5e4514f8bc1c353fba3a8f2a",
       "execution": "SUCCESS"
     },
     "readback": {
@@ -37,7 +37,7 @@
         "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
         "damage_level": "",
         "damage_regions": [],
-        "deadline": 1790206772,
+        "deadline": 1790209180,
         "definition_hash": "",
         "deposit": 1000000000000000,
         "item_label": "WearSeal demo camera",
@@ -55,11 +55,11 @@
         "same_item_confidence": "",
         "serial_hash": "fixture-serial-hash",
         "status": "DRAFT",
-        "vault": "0x0421c6cb9d6c046aab9d3a88baff84ab6aba6dcc",
+        "vault": "0xfa80563d6c489c6058ba0a2cabe54b13a800d5b3",
         "verdict": ""
       },
       "vault": {
-        "agreement": "0x65b8e0ede78ac577aeb4e237a4d9ce653d094f6f",
+        "agreement": "0x47c59b05c4dc09ef2f0cb55b694442510cc05af8",
         "credited": 0,
         "owner_claim": 0,
         "owner_claimed": false,
@@ -70,29 +70,29 @@
     }
   },
   "addresses": {
-    "agreement": "0x65b8e0EDE78AC577aEB4e237A4d9cE653d094f6f",
-    "vault": "0x0421c6Cb9d6C046aab9D3a88bAFf84ab6aBA6dcc"
+    "agreement": "0x47C59B05C4dC09EF2f0Cb55b694442510cc05af8",
+    "vault": "0xfa80563d6c489C6058ba0a2cabE54B13A800d5B3"
   },
   "lifecycle": {
     "network": "Studionet",
     "chainId": 61999,
     "owner": "0x79b3Ecbe6a65beE93b2Fcda78e6909892671507F",
     "renter": "0x53C89d18C2951C4df149d08217f5b5E2Cf1A51C0",
-    "agreement": "0x65b8e0EDE78AC577aEB4e237A4d9cE653d094f6f",
-    "vault": "0x0421c6Cb9d6C046aab9D3a88bAFf84ab6aBA6dcc",
+    "agreement": "0x47C59B05C4dC09EF2f0Cb55b694442510cc05af8",
+    "vault": "0xfa80563d6c489C6058ba0a2cabE54B13A800d5B3",
     "txs": {
-      "acceptBaseline": "0x2dc00b18340e2561875a3959273b16aa24dc4e06de447c4e60050fd5282b596c",
-      "deposit": "0x6063cd88d707361d704c183b3cb85babf4df36f28f280d1c733a5651be2d3096",
-      "submitReturn": "0xd1dd75c81a38a4c1ca62c09363ab32a44efebe6036dc83856bcdbbcd4d58cd4a",
-      "inspect": "0xf1a0fe205391f980f7dc2056c97413de5fcf0bf0176e4f8779c1c1516939a652",
-      "settle": "0x0d2bb96e524df834dfb53ae4eb5bf9cf40d7b7131c47787c8da3e271cdebbf00",
-      "claimOwner": "0x693fbfdf7f651a0257566949e05102f3cf2299c16a83bcee6f260fa91e9284e5",
-      "claimRenter": "0xf02cda5e741dbf34f060969436d6345d6a1a5561bc83f732b816c28dc21176a8"
+      "acceptBaseline": "0xc5929c4333871f7157301ded0a926d0a91ce7bcf463881aba4a6d489eb9913fd",
+      "deposit": "0x1a8d16d744ecc0b552d22f735ee15177f568369b29cffca0d000e78076c36de3",
+      "submitReturn": "0xb0ea6bac4c79c57f456fb7284781a2d7d4d4ae58c24c9b24dd4c196b4c383417",
+      "inspect": "0x0fb319703712e7ac36697d19f35e0bb6f889eda9d959f48e89a6818e2332adad",
+      "settle": "0x3aa73b38d73ed38c9175377a0b8fa7db0ef577f89f2119ff91802d5b382b7cf7",
+      "claimOwner": "0xf30f6fbcf4cfee4033bc899b7cf4c985e391c3bb2a1f484c1974d73d9ffb11d9",
+      "claimRenter": "0xf6e26a2065c3a90d95a2bc74616a0e15dfef7527e6db4578e32ba46d45d16301"
     },
     "steps": [
       {
         "step": "accept_baseline",
-        "tx": "0x2dc00b18340e2561875a3959273b16aa24dc4e06de447c4e60050fd5282b596c",
+        "tx": "0xc5929c4333871f7157301ded0a926d0a91ce7bcf463881aba4a6d489eb9913fd",
         "execution": "SUCCESS",
         "childTransactions": [],
         "agreement": {
@@ -100,8 +100,8 @@
           "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
           "damage_level": "",
           "damage_regions": [],
-          "deadline": 1790206772,
-          "definition_hash": "0x22b252326515586ee77c61ebe07c4efc1bd33325cc1c5015f6a73181785d4f8e",
+          "deadline": 1790209180,
+          "definition_hash": "0x2ab8a11e7459629d3df097ce9b287d84778a082a0997b8de6bc6fc45c1f5c309",
           "deposit": 1000000000000000,
           "item_label": "WearSeal demo camera",
           "material_bps": 10000,
@@ -118,11 +118,11 @@
           "same_item_confidence": "",
           "serial_hash": "fixture-serial-hash",
           "status": "BASELINE_ACCEPTED",
-          "vault": "0x0421c6cb9d6c046aab9d3a88baff84ab6aba6dcc",
+          "vault": "0xfa80563d6c489c6058ba0a2cabe54b13a800d5b3",
           "verdict": ""
         },
         "vault": {
-          "agreement": "0x65b8e0ede78ac577aeb4e237a4d9ce653d094f6f",
+          "agreement": "0x47c59b05c4dc09ef2f0cb55b694442510cc05af8",
           "credited": 0,
           "owner_claim": 0,
           "owner_claimed": false,
@@ -133,11 +133,11 @@
       },
       {
         "step": "deposit",
-        "tx": "0x6063cd88d707361d704c183b3cb85babf4df36f28f280d1c733a5651be2d3096",
+        "tx": "0x1a8d16d744ecc0b552d22f735ee15177f568369b29cffca0d000e78076c36de3",
         "execution": "SUCCESS",
         "childTransactions": [
           {
-            "hash": "0x37c964643762580b16189440a1c37ba11b454034c40aafd35e5ccb9898f37850",
+            "hash": "0x2e343dd18d5ba4a4a2c5e85d5c0644e69e44321929a104e873a2f46f1f5be94c",
             "execution": "SUCCESS"
           }
         ],
@@ -146,8 +146,8 @@
           "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
           "damage_level": "",
           "damage_regions": [],
-          "deadline": 1790206772,
-          "definition_hash": "0x22b252326515586ee77c61ebe07c4efc1bd33325cc1c5015f6a73181785d4f8e",
+          "deadline": 1790209180,
+          "definition_hash": "0x2ab8a11e7459629d3df097ce9b287d84778a082a0997b8de6bc6fc45c1f5c309",
           "deposit": 1000000000000000,
           "item_label": "WearSeal demo camera",
           "material_bps": 10000,
@@ -164,11 +164,11 @@
           "same_item_confidence": "",
           "serial_hash": "fixture-serial-hash",
           "status": "FUNDED",
-          "vault": "0x0421c6cb9d6c046aab9d3a88baff84ab6aba6dcc",
+          "vault": "0xfa80563d6c489c6058ba0a2cabe54b13a800d5b3",
           "verdict": ""
         },
         "vault": {
-          "agreement": "0x65b8e0ede78ac577aeb4e237a4d9ce653d094f6f",
+          "agreement": "0x47c59b05c4dc09ef2f0cb55b694442510cc05af8",
           "credited": 1000000000000000,
           "owner_claim": 0,
           "owner_claimed": false,
@@ -179,7 +179,7 @@
       },
       {
         "step": "submit_return",
-        "tx": "0xd1dd75c81a38a4c1ca62c09363ab32a44efebe6036dc83856bcdbbcd4d58cd4a",
+        "tx": "0xb0ea6bac4c79c57f456fb7284781a2d7d4d4ae58c24c9b24dd4c196b4c383417",
         "execution": "SUCCESS",
         "childTransactions": [],
         "agreement": {
@@ -187,8 +187,8 @@
           "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
           "damage_level": "",
           "damage_regions": [],
-          "deadline": 1790206772,
-          "definition_hash": "0x22b252326515586ee77c61ebe07c4efc1bd33325cc1c5015f6a73181785d4f8e",
+          "deadline": 1790209180,
+          "definition_hash": "0x2ab8a11e7459629d3df097ce9b287d84778a082a0997b8de6bc6fc45c1f5c309",
           "deposit": 1000000000000000,
           "item_label": "WearSeal demo camera",
           "material_bps": 10000,
@@ -205,11 +205,11 @@
           "same_item_confidence": "",
           "serial_hash": "fixture-serial-hash",
           "status": "RETURN_SUBMITTED",
-          "vault": "0x0421c6cb9d6c046aab9d3a88baff84ab6aba6dcc",
+          "vault": "0xfa80563d6c489c6058ba0a2cabe54b13a800d5b3",
           "verdict": ""
         },
         "vault": {
-          "agreement": "0x65b8e0ede78ac577aeb4e237a4d9ce653d094f6f",
+          "agreement": "0x47c59b05c4dc09ef2f0cb55b694442510cc05af8",
           "credited": 1000000000000000,
           "owner_claim": 0,
           "owner_claimed": false,
@@ -220,7 +220,7 @@
       },
       {
         "step": "inspect",
-        "tx": "0xf1a0fe205391f980f7dc2056c97413de5fcf0bf0176e4f8779c1c1516939a652",
+        "tx": "0x0fb319703712e7ac36697d19f35e0bb6f889eda9d959f48e89a6818e2332adad",
         "execution": "SUCCESS",
         "childTransactions": [],
         "agreement": {
@@ -228,17 +228,17 @@
           "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
           "damage_level": "MINOR",
           "damage_regions": [
-            "Diagonal scratch visible across the front face of the item, spanning from left-center to right-center area"
+            "diagonal scratch across central dark circle"
           ],
-          "deadline": 1790206772,
-          "definition_hash": "0x22b252326515586ee77c61ebe07c4efc1bd33325cc1c5015f6a73181785d4f8e",
+          "deadline": 1790209180,
+          "definition_hash": "0x2ab8a11e7459629d3df097ce9b287d84778a082a0997b8de6bc6fc45c1f5c309",
           "deposit": 1000000000000000,
           "item_label": "WearSeal demo camera",
           "material_bps": 10000,
           "minor_bps": 1500,
           "new_damage_present": "YES",
           "owner": "0x79b3ecbe6a65bee93b2fcda78e6909892671507f",
-          "reason": "",
+          "reason": "The return image shows a new thin red diagonal line crossing the central dark circle, consistent with a surface scratch. No structural changes, cracks, or missing parts are visible. The item geometry and background remain identical, confirming it is the same physical object. Per rubric, scratches are classified as minor damage.",
           "reinspection_count": 1,
           "renter": "0x53c89d18c2951c4df149d08217f5b5e2cf1a51c0",
           "return_hash": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d",
@@ -248,11 +248,11 @@
           "same_item_confidence": "HIGH",
           "serial_hash": "fixture-serial-hash",
           "status": "DECIDED",
-          "vault": "0x0421c6cb9d6c046aab9d3a88baff84ab6aba6dcc",
+          "vault": "0xfa80563d6c489c6058ba0a2cabe54b13a800d5b3",
           "verdict": "MINOR_DAMAGE"
         },
         "vault": {
-          "agreement": "0x65b8e0ede78ac577aeb4e237a4d9ce653d094f6f",
+          "agreement": "0x47c59b05c4dc09ef2f0cb55b694442510cc05af8",
           "credited": 1000000000000000,
           "owner_claim": 0,
           "owner_claimed": false,
@@ -263,11 +263,11 @@
       },
       {
         "step": "settle",
-        "tx": "0x0d2bb96e524df834dfb53ae4eb5bf9cf40d7b7131c47787c8da3e271cdebbf00",
+        "tx": "0x3aa73b38d73ed38c9175377a0b8fa7db0ef577f89f2119ff91802d5b382b7cf7",
         "execution": "SUCCESS",
         "childTransactions": [
           {
-            "hash": "0x9e63783eb9b60c7001254bd97b2d7dd419e45596d95dc6bc72c6da4b395dcd0a",
+            "hash": "0xf99ae0fa8d05d65c0a46f6d9decfd79ff0e2f83b104cad6ee49b78741cba6518",
             "execution": "SUCCESS"
           }
         ],
@@ -276,17 +276,17 @@
           "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
           "damage_level": "MINOR",
           "damage_regions": [
-            "Diagonal scratch visible across the front face of the item, spanning from left-center to right-center area"
+            "diagonal scratch across central dark circle"
           ],
-          "deadline": 1790206772,
-          "definition_hash": "0x22b252326515586ee77c61ebe07c4efc1bd33325cc1c5015f6a73181785d4f8e",
+          "deadline": 1790209180,
+          "definition_hash": "0x2ab8a11e7459629d3df097ce9b287d84778a082a0997b8de6bc6fc45c1f5c309",
           "deposit": 1000000000000000,
           "item_label": "WearSeal demo camera",
           "material_bps": 10000,
           "minor_bps": 1500,
           "new_damage_present": "YES",
           "owner": "0x79b3ecbe6a65bee93b2fcda78e6909892671507f",
-          "reason": "",
+          "reason": "The return image shows a new thin red diagonal line crossing the central dark circle, consistent with a surface scratch. No structural changes, cracks, or missing parts are visible. The item geometry and background remain identical, confirming it is the same physical object. Per rubric, scratches are classified as minor damage.",
           "reinspection_count": 1,
           "renter": "0x53c89d18c2951c4df149d08217f5b5e2cf1a51c0",
           "return_hash": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d",
@@ -296,11 +296,11 @@
           "same_item_confidence": "HIGH",
           "serial_hash": "fixture-serial-hash",
           "status": "SETTLED",
-          "vault": "0x0421c6cb9d6c046aab9d3a88baff84ab6aba6dcc",
+          "vault": "0xfa80563d6c489c6058ba0a2cabe54b13a800d5b3",
           "verdict": "MINOR_DAMAGE"
         },
         "vault": {
-          "agreement": "0x65b8e0ede78ac577aeb4e237a4d9ce653d094f6f",
+          "agreement": "0x47c59b05c4dc09ef2f0cb55b694442510cc05af8",
           "credited": 0,
           "owner_claim": 150000000000000,
           "owner_claimed": false,
@@ -311,11 +311,11 @@
       },
       {
         "step": "claim_owner",
-        "tx": "0x693fbfdf7f651a0257566949e05102f3cf2299c16a83bcee6f260fa91e9284e5",
+        "tx": "0xf30f6fbcf4cfee4033bc899b7cf4c985e391c3bb2a1f484c1974d73d9ffb11d9",
         "execution": "SUCCESS",
         "childTransactions": [
           {
-            "hash": "0xb244260f91c30c14fa035683bd73daec86c15fe0c355105d028de0ca347bfaeb"
+            "hash": "0x1b51ffbd80899e2e2afc639192af3b7a2534608467c95ab93ccc39600fa1dc74"
           }
         ],
         "agreement": {
@@ -323,17 +323,17 @@
           "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
           "damage_level": "MINOR",
           "damage_regions": [
-            "Diagonal scratch visible across the front face of the item, spanning from left-center to right-center area"
+            "diagonal scratch across central dark circle"
           ],
-          "deadline": 1790206772,
-          "definition_hash": "0x22b252326515586ee77c61ebe07c4efc1bd33325cc1c5015f6a73181785d4f8e",
+          "deadline": 1790209180,
+          "definition_hash": "0x2ab8a11e7459629d3df097ce9b287d84778a082a0997b8de6bc6fc45c1f5c309",
           "deposit": 1000000000000000,
           "item_label": "WearSeal demo camera",
           "material_bps": 10000,
           "minor_bps": 1500,
           "new_damage_present": "YES",
           "owner": "0x79b3ecbe6a65bee93b2fcda78e6909892671507f",
-          "reason": "",
+          "reason": "The return image shows a new thin red diagonal line crossing the central dark circle, consistent with a surface scratch. No structural changes, cracks, or missing parts are visible. The item geometry and background remain identical, confirming it is the same physical object. Per rubric, scratches are classified as minor damage.",
           "reinspection_count": 1,
           "renter": "0x53c89d18c2951c4df149d08217f5b5e2cf1a51c0",
           "return_hash": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d",
@@ -343,11 +343,11 @@
           "same_item_confidence": "HIGH",
           "serial_hash": "fixture-serial-hash",
           "status": "SETTLED",
-          "vault": "0x0421c6cb9d6c046aab9d3a88baff84ab6aba6dcc",
+          "vault": "0xfa80563d6c489c6058ba0a2cabe54b13a800d5b3",
           "verdict": "MINOR_DAMAGE"
         },
         "vault": {
-          "agreement": "0x65b8e0ede78ac577aeb4e237a4d9ce653d094f6f",
+          "agreement": "0x47c59b05c4dc09ef2f0cb55b694442510cc05af8",
           "credited": 0,
           "owner_claim": 150000000000000,
           "owner_claimed": true,
@@ -358,11 +358,11 @@
       },
       {
         "step": "claim_renter",
-        "tx": "0xf02cda5e741dbf34f060969436d6345d6a1a5561bc83f732b816c28dc21176a8",
+        "tx": "0xf6e26a2065c3a90d95a2bc74616a0e15dfef7527e6db4578e32ba46d45d16301",
         "execution": "SUCCESS",
         "childTransactions": [
           {
-            "hash": "0xa9f4c211cef3dfd88b3fda5f5adb3efe7853a24069706259ff167202d1c09d46"
+            "hash": "0x0ffa608daf9dd3ed64db0998ab2eb8757fcacf278a213e7b2ad2935cc34bf00d"
           }
         ],
         "agreement": {
@@ -370,17 +370,17 @@
           "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
           "damage_level": "MINOR",
           "damage_regions": [
-            "Diagonal scratch visible across the front face of the item, spanning from left-center to right-center area"
+            "diagonal scratch across central dark circle"
           ],
-          "deadline": 1790206772,
-          "definition_hash": "0x22b252326515586ee77c61ebe07c4efc1bd33325cc1c5015f6a73181785d4f8e",
+          "deadline": 1790209180,
+          "definition_hash": "0x2ab8a11e7459629d3df097ce9b287d84778a082a0997b8de6bc6fc45c1f5c309",
           "deposit": 1000000000000000,
           "item_label": "WearSeal demo camera",
           "material_bps": 10000,
           "minor_bps": 1500,
           "new_damage_present": "YES",
           "owner": "0x79b3ecbe6a65bee93b2fcda78e6909892671507f",
-          "reason": "",
+          "reason": "The return image shows a new thin red diagonal line crossing the central dark circle, consistent with a surface scratch. No structural changes, cracks, or missing parts are visible. The item geometry and background remain identical, confirming it is the same physical object. Per rubric, scratches are classified as minor damage.",
           "reinspection_count": 1,
           "renter": "0x53c89d18c2951c4df149d08217f5b5e2cf1a51c0",
           "return_hash": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d",
@@ -390,11 +390,11 @@
           "same_item_confidence": "HIGH",
           "serial_hash": "fixture-serial-hash",
           "status": "SETTLED",
-          "vault": "0x0421c6cb9d6c046aab9d3a88baff84ab6aba6dcc",
+          "vault": "0xfa80563d6c489c6058ba0a2cabe54b13a800d5b3",
           "verdict": "MINOR_DAMAGE"
         },
         "vault": {
-          "agreement": "0x65b8e0ede78ac577aeb4e237a4d9ce653d094f6f",
+          "agreement": "0x47c59b05c4dc09ef2f0cb55b694442510cc05af8",
           "credited": 0,
           "owner_claim": 150000000000000,
           "owner_claimed": true,
@@ -406,13 +406,13 @@
     ],
     "balanceProof": {
       "before": {
-        "owner": "927765749999999999980",
-        "renter": "70250000000000000",
+        "owner": "927765899999999999980",
+        "renter": "70100000000000000",
         "vault": "1000000000000000"
       },
       "after": {
-        "owner": "927765899999999999980",
-        "renter": "71100000000000000",
+        "owner": "927766049999999999980",
+        "renter": "70950000000000000",
         "vault": "0"
       },
       "actualOwnerDelta": "150000000000000",
@@ -425,17 +425,17 @@
         "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
         "damage_level": "MINOR",
         "damage_regions": [
-          "Diagonal scratch visible across the front face of the item, spanning from left-center to right-center area"
+          "diagonal scratch across central dark circle"
         ],
-        "deadline": 1790206772,
-        "definition_hash": "0x22b252326515586ee77c61ebe07c4efc1bd33325cc1c5015f6a73181785d4f8e",
+        "deadline": 1790209180,
+        "definition_hash": "0x2ab8a11e7459629d3df097ce9b287d84778a082a0997b8de6bc6fc45c1f5c309",
         "deposit": 1000000000000000,
         "item_label": "WearSeal demo camera",
         "material_bps": 10000,
         "minor_bps": 1500,
         "new_damage_present": "YES",
         "owner": "0x79b3ecbe6a65bee93b2fcda78e6909892671507f",
-        "reason": "",
+        "reason": "The return image shows a new thin red diagonal line crossing the central dark circle, consistent with a surface scratch. No structural changes, cracks, or missing parts are visible. The item geometry and background remain identical, confirming it is the same physical object. Per rubric, scratches are classified as minor damage.",
         "reinspection_count": 1,
         "renter": "0x53c89d18c2951c4df149d08217f5b5e2cf1a51c0",
         "return_hash": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d",
@@ -445,11 +445,11 @@
         "same_item_confidence": "HIGH",
         "serial_hash": "fixture-serial-hash",
         "status": "SETTLED",
-        "vault": "0x0421c6cb9d6c046aab9d3a88baff84ab6aba6dcc",
+        "vault": "0xfa80563d6c489c6058ba0a2cabe54b13a800d5b3",
         "verdict": "MINOR_DAMAGE"
       },
       "vault": {
-        "agreement": "0x65b8e0ede78ac577aeb4e237a4d9ce653d094f6f",
+        "agreement": "0x47c59b05c4dc09ef2f0cb55b694442510cc05af8",
         "credited": 0,
         "owner_claim": 150000000000000,
         "owner_claimed": true,
@@ -461,13 +461,13 @@
   },
   "economics": {
     "originalDeposit": "1000000000000000",
-    "expectedOwnerPayout": 150000000000000,
-    "expectedRenterRefund": 850000000000000,
+    "expectedOwnerPayout": "150000000000000",
+    "expectedRenterRefund": "850000000000000",
     "conservation": true,
     "creditedAfterSettlement": 0
   },
   "repeatSettlement": {
-    "hash": "0x3ad2a0f09a6031282b99c2295f09d02dbf886418e3fd228d576ad512e60f9dc2",
+    "hash": "0xe9cda61f37fb0c42e9628d95bb76e5482105c584dc540607756b05da3101116a",
     "execution": "ERROR",
     "stateUnchanged": true
   },
