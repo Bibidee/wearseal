@@ -1,0 +1,1 @@
+export default function Identicon({address}:{address:string}){const chars=address.replace(/^0x/,'');return <span className="identicon" aria-hidden="true">{Array.from({length:16},(_,i)=><i key={i} style={{background:parseInt(chars.slice(i*2,i*2+2)||'0',16)%3===0?'var(--orange)':'var(--ink)'}}/> )}</span>}
