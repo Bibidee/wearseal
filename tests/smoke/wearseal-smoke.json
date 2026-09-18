@@ -1,0 +1,38 @@
+{
+  "name": "WearSeal clean two-party smoke test",
+  "network": {
+    "name": "GenLayer Studionet",
+    "chainId": 61999
+  },
+  "agreement": {
+    "itemLabel": "Smoke-test equipment",
+    "renter": "0xFb67de8f364B97cFDFef45AdAfA6A7739aE572F2",
+    "depositWei": "1000000000000000",
+    "minorBps": 1500,
+    "materialBps": 10000,
+    "durationDays": 7
+  },
+  "fixtures": {
+    "checkoutUrl": "https://wearseal.vercel.app/fixtures/manual-clean-checkout.svg",
+    "returnUrl": "https://wearseal.vercel.app/fixtures/manual-clean-return.svg",
+    "returnLocalFile": "public/fixtures/manual-clean-return.svg",
+    "checkoutSha256": "e96d4910dda5dd324ab8c49727b4d9a89a45327ee4f6f3257d0b7e5f84cd96cc",
+    "returnSha256": "47cc827b6a89fdb34aaf07918b0ec3d8935ef7611574740d1845e170e5a7445b"
+  },
+  "flow": [
+    {"step": 1, "route": "/new", "actor": "owner", "action": "Create agreement", "expect": "DRAFT"},
+    {"step": 2, "route": "/baseline", "actor": "renter", "action": "Accept baseline", "approval": true, "expect": "BASELINE_ACCEPTED"},
+    {"step": 3, "route": "/fund", "actor": "owner", "action": "Fund exact deposit", "approval": true, "expect": "FUNDED and vault credited = 1000000000000000"},
+    {"step": 4, "route": "/return", "actor": "renter", "action": "Upload returnLocalFile and verify returnUrl", "approval": true, "expect": "RETURN_SUBMITTED"},
+    {"step": 5, "route": "/inspect", "actor": "owner", "action": "Start inspection", "approval": true, "expect": "DECIDED with a live GenLayer verdict"},
+    {"step": 6, "route": "/inspect", "actor": "owner", "action": "Settle deposit", "approval": true, "expect": "SETTLED and vault remaining = 0"},
+    {"step": 7, "route": "/inspect", "actor": "owner", "action": "Claim owner allocation", "approval": true, "expect": "owner_claimed = true"},
+    {"step": 8, "route": "/inspect", "actor": "renter", "action": "Claim renter allocation", "approval": true, "expect": "renter_claimed = true and both claims finalized"}
+  ],
+  "finalReadback": {
+    "agreementStatus": "SETTLED",
+    "vaultCreditedWei": "0",
+    "ownerClaimed": true,
+    "renterClaimed": true
+  }
+}
