@@ -11,11 +11,13 @@ import {submitAndConfirm, TxState} from '../lib/genlayer/transaction';
 import {useWallet} from '../lib/wallet/provider';
 import {verifyEvidence} from '../lib/hash';
 import {validateEvidenceUrl} from '../lib/evidence';
+import {explorerTx} from '../lib/genlayer/network';
 
 type Action = 'accept' | 'fund' | 'return' | 'inspect' | 'receipt';
 type Mode = 'SIDE BY SIDE' | 'SLIDER' | 'BLINK' | 'ZOOM';
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const short = (value: string) => value ? `${value.slice(0, 8)}…${value.slice(-6)}` : '—';
+const txLabel = (phase: TxState['phase']) => phase.replaceAll('_', ' ');
 
 export default function LiveRoute({id, action}: {id: string; action: Action}) {
   const wallet = useWallet();
@@ -54,6 +56,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
       <section className="passport-section"><h3>04 / PROOF MODE</h3><button className="button secondary" onClick={() => setProof(!proof)}>{proof ? 'PRODUCT VIEW' : 'PROOF VIEW'}</button>{proof && <div className="proof-grid proof-output"><div className="proof-item"><label>DEFINITION HASH</label><HashDNA hash={agreement.definition_hash}/><code>{agreement.definition_hash}</code></div><div className="proof-item"><label>RETURN HASH</label><code>{agreement.return_hash || '—'}</code></div><div className="proof-item"><label>CHAIN</label><code>GENLAYER STUDIONET · 61999</code></div></div>}</section>
     </>}
     {error && <div className="tx-banner"><strong>CANONICAL ERROR</strong>{error}</div>}
+    {tx.hash && <div className="tx-banner"><strong>{txLabel(tx.phase)}</strong><a className="mono" href={explorerTx(tx.hash)} target="_blank" rel="noreferrer">{tx.hash}</a><a href={explorerTx(tx.hash)} target="_blank" rel="noreferrer">OPEN IN STUDIONET EXPLORER →</a>{tx.error && <span>{tx.error}</span>}</div>}
     {action === 'accept' && <section className="form-card"><h2>Seal the baseline.</h2><label className="form-label">CANONICAL DEFINITION HASH<input className="plate" value={value} onChange={e => setValue(e.target.value)} placeholder="0x + 64-character definition hash"/></label><button className="button" onClick={run}>{tx.phase === 'IDLE' ? 'ACCEPT BASELINE →' : tx.phase}</button></section>}
     {action === 'fund' && <section className="form-card"><h2>Fund the exact security.</h2><p className="subhead">Deposit exactly {String(agreement?.deposit || '—')} wei. Funding confirmation waits for Agreement and Vault state to agree.</p><button className="button" onClick={run}>{tx.phase === 'IDLE' ? 'FUND AGREEMENT →' : tx.phase}</button></section>}
     {action === 'return' && <section className="form-card"><h2>Verify the return image.</h2><label className="form-label">LOCAL RETURN IMAGE<input className="plate" type="file" accept="image/*" onChange={e => {setLocal(e.target.files?.[0]); setMatch(undefined); setHash('');}}/></label><label className="form-label">PUBLIC HTTPS RETURN URL<input className="plate" value={value} onChange={e => setValue(e.target.value)}/></label><button className="button secondary" onClick={verifyReturn}>VERIFY BYTES</button>{hash && <p className="mono">REMOTE HASH {hash} · {match ? 'MATCH' : 'MISMATCH'}</p>}<button className="button" onClick={run}>{tx.phase === 'IDLE' ? 'SUBMIT RETURN →' : tx.phase}</button></section>}
