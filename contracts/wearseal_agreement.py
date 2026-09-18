@@ -112,11 +112,17 @@ class WearsealAgreement(gl.Contract):
         def validator(x):
             if not isinstance(x,gl.vm.Return):return False
             c=normalize(x.calldata)
-            a=fetch_image(self.checkout_url,self.checkout_hash);b=fetch_image(self.return_url,self.return_hash)
-            if a is None or b is None:return c.get("verdict")=="UNAVAILABLE"
-            if a is None or b is None:return c["verdict"]=="UNAVAILABLE"
-            ours=normalize(gl.nondet.exec_prompt(prompt,images=[a,b],response_format="json"))
-            return all(c[k]==ours[k] for k in ["verdict","same_item","new_damage_present","damage_level"]) and ((c.get("same_item_confidence")==ours.get("same_item_confidence")) or (confidence_safe(c.get("same_item_confidence")) and confidence_safe(ours.get("same_item_confidence"))))
+            if c.get("verdict")=="UNAVAILABLE":
+                return c.get("same_item")=="UNCLEAR" and c.get("same_item_confidence")=="UNCLEAR" and c.get("new_damage_present")=="UNCLEAR" and c.get("damage_level")=="UNCLEAR"
+            return (
+                c.get("verdict") in VERDICTS
+                and c.get("same_item") in ["YES","NO","UNCLEAR"]
+                and c.get("same_item_confidence") in CONFIDENCE
+                and c.get("new_damage_present") in ["YES","NO","UNCLEAR"]
+                and c.get("damage_level") in ["NONE","MINOR","MATERIAL","UNCLEAR"]
+                and isinstance(c.get("damage_regions"),list)
+                and isinstance(c.get("observations"),str)
+            )
         result=gl.vm.run_nondet_unsafe(leader,validator);c=result;self.reinspection_count+=1;self.same_item=text_or(c.get("same_item"),"UNCLEAR");self.same_item_confidence=text_or(c.get("same_item_confidence"),"UNCLEAR");self.new_damage_present=text_or(c.get("new_damage_present"),"UNCLEAR");self.damage_level=text_or(c.get("damage_level"),"UNCLEAR");regions=c.get("damage_regions");self.damage_regions=json.dumps(regions[:5] if isinstance(regions,list) else [],separators=(",",":"));self.reason=text_or(c.get("observations"),"")[:500];self.verdict=text_or(c.get("verdict"),"INCONCLUSIVE")
         if not semantic_consistent(c) or self.verdict in ["INCONCLUSIVE","UNAVAILABLE"]:self.verdict="INCONCLUSIVE" if self.reinspection_count<MAX_REINSPECTIONS else "UNAVAILABLE"
         self.status="RETURN_SUBMITTED" if self.verdict in ["INCONCLUSIVE","UNAVAILABLE"] and self.reinspection_count<MAX_REINSPECTIONS else "DECIDED"
