@@ -30,12 +30,17 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
   const [hash, setHash] = useState('');
   const [local, setLocal] = useState<File>();
   const [match, setMatch] = useState<boolean>();
-  const [tx, setTx] = useState<TxState>({phase: 'IDLE'});
+  const txStorageKey = `wearseal:tx:${id}:${action}`;
+  const [tx, setTx] = useState<TxState>(() => {
+    if (typeof window === 'undefined') return {phase: 'IDLE'};
+    try { return JSON.parse(window.sessionStorage.getItem(txStorageKey) || '') as TxState; } catch { return {phase: 'IDLE'}; }
+  });
   const [error, setError] = useState('');
   const agreementAddress = useMemo(() => { try { return requireAddress(id, 'Agreement'); } catch { return ''; } }, [id]);
   const vaultAddress = agreement?.vault ? String(agreement.vault) : '';
   const read = async () => { if (!agreementAddress) return {a: null, v: null}; const a = await readAgreement(agreementAddress); const v = a?.vault ? await readVault(requireAddress(String(a.vault), 'Vault')) : null; setAgreement(a); setVault(v); return {a, v}; };
   useEffect(() => { void read().catch(e => setError(String(e))); }, [agreementAddress]);
+  useEffect(() => { if (tx.hash) window.sessionStorage.setItem(txStorageKey, JSON.stringify(tx)); }, [tx, txStorageKey]);
   const expected = async (before: any) => { for (let i = 0; i < 12; i++) { const {a, v} = await read(); if (action === 'accept' && a?.status === 'BASELINE_ACCEPTED') return true; if (action === 'fund' && a?.status === 'FUNDED' && v?.credited === BigInt(a.deposit)) return true; if (action === 'return' && a?.status === 'RETURN_SUBMITTED' && a.return_url === value && a.return_hash === hash) return true; if (action === 'inspect' && (a?.status === 'DECIDED' || (a?.status === 'RETURN_SUBMITTED' && BigInt(a.reinspection_count) > BigInt(before?.reinspection_count || 0)))) return true; await wait(5000); } return false; };
   const verifyReturn = async () => { try { setError(''); if (!local) throw Error('Select the local return image first.'); if (!validateEvidenceUrl(value)) throw Error('Use a safe HTTPS return URL.'); const result = await verifyEvidence(local, value); setHash(result.localHash); setMatch(result.match); if (!result.match) throw Error('Local and remote return hashes do not match.'); } catch (e) { setMatch(false); setError(e instanceof Error ? e.message : String(e)); } };
   const run = async () => { try { setError(''); if (!wallet?.client || !wallet.account) throw Error('Connect a Studionet wallet first.'); if (!wallet.onStudionet) throw Error('Switch wallet to Studionet 61999.'); const before = agreement; let call: any; if (action === 'accept') call = {address: agreementAddress, functionName: 'accept_baseline', args: [value]}; else if (action === 'fund') call = {address: vaultAddress, functionName: 'deposit', args: [], value: BigInt(agreement.deposit)}; else if (action === 'return') { if (match !== true) throw Error('Verify the local and remote return images first.'); call = {address: agreementAddress, functionName: 'submit_return', args: [value, hash]}; } else if (action === 'inspect') call = {address: agreementAddress, functionName: 'inspect', args: []}; else throw Error('This page is read-only.'); await submitAndConfirm(wallet.client, call, () => expected(before), setTx); } catch (e) { setError(e instanceof Error ? e.message : String(e)); } };
