@@ -11,6 +11,6 @@ describe('evidence validation and identity',()=>{
  it('rejects fetch failure, empty body and oversized evidence',async()=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response('',{status:200})));await expect((await import('../../lib/hash')).fetchAndHash('https://example.com/x')).rejects.toThrow('empty');vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response('no',{status:503})));await expect((await import('../../lib/hash')).fetchAndHash('https://example.com/x')).rejects.toThrow('503')});
 });
 describe('transaction and deadline helpers',()=>{
- it('requires successful execution, not finality alone',()=>{expect(classifyReceipt({tx_execution_result_name:'FINISHED_WITH_RETURN'}).ok).toBe(true);expect(classifyReceipt({tx_execution_result_name:'FINISHED_WITH_ERROR'}).ok).toBe(false);expect(classifyReceipt({status:'FINALIZED'}).ok).toBe(false)});
+ it('requires successful execution, not finality alone',()=>{expect(classifyReceipt({tx_execution_result_name:'FINISHED_WITH_RETURN'}).ok).toBe(true);expect(classifyReceipt({txExecutionResultName:'FINISHED_WITH_RETURN'}).ok).toBe(true);expect(classifyReceipt({tx_execution_result_name:'FINISHED_WITH_ERROR'}).ok).toBe(false);expect(classifyReceipt({status:'FINALIZED'}).ok).toBe(false)});
  it('rejects past and absurd deadlines',()=>{expect(()=>deadlineFromDate('2020-01-01',1700000000)).toThrow();expect(()=>deadlineFromDate('2030-01-01',1700000000)).toThrow()});
 });
