@@ -53,7 +53,6 @@ export function WalletProvider({children}: {children: React.ReactNode}) {
   };
 
   const disconnect = async () => {
-    try { await provider?.request({method: 'wallet_revokePermissions', params: [{eth_accounts: {}}]}); } catch { /* Some wallets do not expose permission revocation. */ }
     setAccount(undefined);
     setError('');
   };
