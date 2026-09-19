@@ -49,7 +49,8 @@ export async function POST(request: Request) {
     const expected = BigInt(body.kind === 'owner_claim' ? vault.owner_claim : vault.renter_claim);
     if (BigInt(claimed.args.amount) !== expected || getAddress(String(transaction.from)) !== getAddress(String(body.kind === 'owner_claim' ? agreement.owner : agreement.renter))) return NextResponse.json({error: 'Claim amount or recipient does not match authoritative Vault state'}, {status: 409});
     const functionName = body.kind === 'owner_claim' ? 'ack_owner_claim' : 'ack_renter_claim';
-    const hash = await client.writeContract({address: vaultAddress, abi: vaultAbi, functionName, args: [body.tx], leaderOnly: true});
+    const writeContract = client.writeContract as unknown as (args: Record<string, unknown>) => Promise<`0x${string}`>;
+    const hash = await writeContract({address: vaultAddress, abi: vaultAbi, functionName, args: [body.tx], leaderOnly: true});
     return NextResponse.json({hash});
   } catch (error) { return NextResponse.json({error: error instanceof Error ? error.message : String(error)}, {status: 500}); }
 }
