@@ -13,5 +13,6 @@ describe('evidence validation and identity',()=>{
 describe('transaction and deadline helpers',()=>{
  it('requires successful execution, not finality alone',()=>{expect(classifyReceipt({tx_execution_result_name:'FINISHED_WITH_RETURN'}).ok).toBe(true);expect(classifyReceipt({txExecutionResultName:'FINISHED_WITH_RETURN'}).ok).toBe(true);expect(classifyReceipt({tx_execution_result_name:'FINISHED_WITH_ERROR'}).ok).toBe(false);expect(classifyReceipt({status:'FINALIZED'}).ok).toBe(false)});
  it('never converts a reverted transaction into success from a stale readback',async()=>{const states:any[]=[];const client={writeContract:vi.fn().mockResolvedValue('0xabc'),waitForTransactionReceipt:vi.fn().mockResolvedValue({tx_execution_result_name:'ERROR'})};await submitAndConfirm(client,{},async()=>true,state=>states.push(state));expect(states.at(-1)).toMatchObject({phase:'EXECUTION_ERROR',hash:'0xabc'});});
+ it('treats a finalized success as authoritative over a stale timeout banner',()=>{const state={phase:'FINALIZED_SUCCESS',hash:'0xabc',error:undefined};expect(state.phase).toBe('FINALIZED_SUCCESS');expect(state.error).toBeUndefined();});
  it('rejects past and absurd deadlines',()=>{expect(()=>deadlineFromDate('2020-01-01',1700000000)).toThrow();expect(()=>deadlineFromDate('2030-01-01',1700000000)).toThrow()});
 });

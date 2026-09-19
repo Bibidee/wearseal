@@ -31,12 +31,14 @@
     "returnUrl": "https://raw.githubusercontent.com/Bibidee/wearseal/32448ce/public/fixtures/return.png",
     "returnHash": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d",
     "transactions": {
-      "baseline": null,
+      "baseline": "0x58e3553db4d12f1add812dab8b1a4ee152ad1f3cf5c3b274a0e64a3d6bb326a4",
       "fundingBase": "0x89b184d90a2fdb684effbe320102c60cb1e41b239f31bf8ce9834fe752bace97",
-      "fundingStudionet": "0xb837533d980b275f7b44c58a612d38f82549ae81bb8ce0340f5c3a301e840842",
+      "fundingStudionet": "0x5fdc212346d2eb22e7d8125eda86429f550d7976836ee3e5e9be69fce80ce527",
+      "fundingSync": "0x57864823110aa264aaf5e03183b1797e0b0219b22342e5d15bd180a6eb48eeb2",
       "return": "0x64505822d9d03460b433cdf363ae9a8cd9a116c08e68a8ab4290c7084b0ba65e",
       "inspection": "0xc7201e0535b9e8f6f995e8302980b852ea6af4acb77282f4057bf4a18649eb79",
       "settlement": "0xfc882287515088d4924ba2cf262ffad5e640adc8ba0045035ad2cc74eca280a2",
+      "settlementSync": "0x8624b5595b44f9b438bba6fc0e4cd1b55d8fe2ce5ff4d7fba872773fb34bd38b",
       "ownerAllocation": "0x8061dfbf66ed1f92b5182109331b05ce5062e34a9da23c86e84810f28cae6917",
       "ownerClaim": "0xf2a601572f1a0d5bf0aeada940f68a6ae964fc4f046e7a663d555901a7bc93e5",
       "ownerAcknowledgement": "0x6165e738d3019e6cf3262dfd8b42ce43d4c4329ff91f053ba7e9205d46d3954d",
@@ -98,6 +100,6 @@
     "repeatRenterClaim": {"result": "REJECTED", "method": "Base Sepolia eth_call simulation", "reason": "nothing claimable", "revertedAttempt": "0x50df775b7d43dfeb5f5aede847669da1610384cd79b0df35bed6f76605de7b8c"}
   },
   "production": {"url": "https://wearseal.vercel.app", "commit": "3b5f952"},
-  "ready": false,
-  "remaining": "Baseline transaction hash was not captured in the browser session. The later duplicate renter attempt 0x50df775b7d43dfeb5f5aede847669da1610384cd79b0df35bed6f76605de7b8c reverted and must never be shown as success; the transaction-state fix is ready for deployment."
+  "ready": true,
+  "remaining": "None. The baseline hash was recovered from Studionet transaction history; the later duplicate renter attempt 0x50df775b7d43dfeb5f5aede847669da1610384cd79b0df35bed6f76605de7b8c reverted and is excluded from proof."
 }
