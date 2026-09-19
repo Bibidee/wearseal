@@ -6,7 +6,7 @@ import EvidenceCard from './evidence-card';
 import Identicon from './identicon';
 import HashDNA from './hash-dna';
 import InspectionRoom from './inspection-room';
-import {readAgreement, readVault, requireAddress} from '../lib/genlayer/contracts';
+import {readAgreement, readCanonicalDefinitionHash, readVault, requireAddress} from '../lib/genlayer/contracts';
 import {submitAndConfirm, TxState} from '../lib/genlayer/transaction';
 import {useWallet} from '../lib/wallet/provider';
 import {verifyEvidence} from '../lib/hash';
@@ -43,7 +43,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
   const agreementAddress = useMemo(() => { try { return requireAddress(id, 'Agreement'); } catch { return ''; } }, [id]);
   const vaultAddress = agreement?.vault ? String(agreement.vault) : '';
   const read = async () => { if (!agreementAddress) return {a: null, v: null}; const a = await readAgreement(agreementAddress); const v = a?.vault ? await readVault(requireAddress(String(a.vault), 'Vault')) : null; setAgreement(a); setVault(v); try { const p = await readBasePool(agreementAddress); setBasePool(p); if (wallet.account) setBaseClaimable(await readBaseClaimable(agreementAddress, wallet.account)); } catch { setBasePool(undefined); } return {a, v}; };
-  useEffect(() => { void read().catch(e => setError(String(e))); }, [agreementAddress]);
+  useEffect(() => { void read().then(async ({a}) => { if (agreementAddress && action === 'accept' && a?.status === 'DRAFT') setValue(await readCanonicalDefinitionHash(agreementAddress)); }).catch(e => setError(String(e))); }, [agreementAddress, action]);
   useEffect(() => { if (tx.phase === 'CANONICAL_MISMATCH' && agreement?.status === 'SETTLED' && vault?.settled && BigInt(vault?.credited ?? 0) === 0n) { setError(''); setTx(current => ({...current, phase: 'FINALIZED_SUCCESS', error: undefined})); } }, [agreement?.status, vault?.settled, vault?.credited, tx.phase]);
   useEffect(() => { if (tx.hash) window.sessionStorage.setItem(txStorageKey, JSON.stringify(tx)); }, [tx, txStorageKey]);
   const expected = async (before: any) => { for (let i = 0; i < 12; i++) { const {a, v} = await read(); if (action === 'accept' && a?.status === 'BASELINE_ACCEPTED') return true; if (action === 'fund' && a?.status === 'FUNDED' && v?.credited === BigInt(a.deposit)) return true; if (action === 'return' && a?.status === 'RETURN_SUBMITTED' && a.return_url === value && a.return_hash === hash) return true; if (action === 'inspect' && (a?.status === 'DECIDED' || (a?.status === 'RETURN_SUBMITTED' && BigInt(a.reinspection_count) > BigInt(before?.reinspection_count || 0)))) return true; await wait(5000); } return false; };
@@ -64,7 +64,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
       }
       if (!wallet.onStudionet) throw Error('Switch wallet to Studionet 61999.');
       let call: any;
-      if (action === 'accept') call = {address: agreementAddress, functionName: 'accept_baseline', args: [value]};
+      if (action === 'accept') { if (wallet.account.toLowerCase() !== String(agreement.renter).toLowerCase()) throw Error('Only the renter wallet can accept the baseline. Switch to the renter account.'); if (!value) throw Error('Canonical definition hash is still loading.'); call = {address: agreementAddress, functionName: 'accept_baseline', args: [value]}; }
       else if (action === 'return') { if (match !== true) throw Error('Verify the local and remote return images first.'); call = {address: agreementAddress, functionName: 'submit_return', args: [value, hash]}; }
       else if (action === 'inspect') call = {address: agreementAddress, functionName: 'inspect', args: []};
       else throw Error('This page is read-only.');
@@ -110,7 +110,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
     </>}
     {error && <div className="tx-banner"><strong>CANONICAL ERROR</strong>{error}</div>}
     {tx.hash && <div className="tx-banner"><strong>{txLabel(tx.phase)}</strong><a className="mono" href={explorerTx(tx.hash)} target="_blank" rel="noreferrer">{tx.hash}</a><a href={explorerTx(tx.hash)} target="_blank" rel="noreferrer">OPEN IN STUDIONET EXPLORER →</a>{tx.error && <span>{tx.error}</span>}</div>}
-    {action === 'accept' && status === 'DRAFT' && <section className="form-card"><h2>Seal the baseline.</h2><label className="form-label">CANONICAL DEFINITION HASH<input className="plate" value={value} onChange={e => setValue(e.target.value)} placeholder="0x + 64-character definition hash"/></label><button className="button" onClick={run}>{tx.phase === 'IDLE' ? 'ACCEPT BASELINE →' : tx.phase}</button></section>}
+    {action === 'accept' && status === 'DRAFT' && <section className="form-card"><h2>Seal the baseline.</h2><p className="subhead">The renter wallet must accept this record. The canonical definition hash is read directly from Agreement.</p><label className="form-label">CANONICAL DEFINITION HASH<input className="plate" value={value} readOnly placeholder="READING CANONICAL HASH…"/></label><button className="button" disabled={!value || wallet.account?.toLowerCase() !== String(agreement.renter).toLowerCase()} onClick={run}>{tx.phase === 'IDLE' ? 'ACCEPT BASELINE →' : tx.phase}</button></section>}
     {action === 'fund' && status === 'BASELINE_ACCEPTED' && <section className="form-card"><h2>Fund the exact security.</h2><p className="subhead">Deposit exactly {String(agreement?.deposit || '—')} wei. Funding confirmation waits for Agreement and Vault state to agree.</p><button className="button" onClick={run}>{tx.phase === 'IDLE' ? 'FUND AGREEMENT →' : tx.phase}</button></section>}
     {action === 'return' && ['FUNDED','ACTIVE'].includes(status) && <section className="form-card"><h2>Verify the return image.</h2><label className="form-label">LOCAL RETURN IMAGE<input className="plate" type="file" accept="image/*" onChange={e => {setLocal(e.target.files?.[0]); setMatch(undefined); setHash('');}}/></label><label className="form-label">PUBLIC HTTPS RETURN URL<input className="plate" value={value} onChange={e => setValue(e.target.value)}/></label><button className="button secondary" onClick={verifyReturn}>VERIFY BYTES</button>{hash && <p className="mono">REMOTE HASH {hash} · {match ? 'MATCH' : 'MISMATCH'}</p>}<button className="button" onClick={run}>{tx.phase === 'IDLE' ? 'SUBMIT RETURN →' : tx.phase}</button></section>}
     {action === 'inspect' && status === 'RETURN_SUBMITTED' && <section className="form-card"><h2>Run the evidence pair.</h2><p className="subhead">GenLayer will fetch the committed bytes, compare the images, and return a bounded semantic result.</p><button className="button" onClick={run}>{tx.phase === 'IDLE' ? 'START INSPECTION →' : tx.phase}</button></section>}
