@@ -17,6 +17,7 @@ import {claimData, fundData, readBaseClaimable, readBasePool, sendBase, waitBase
 type Action = 'accept' | 'fund' | 'return' | 'inspect' | 'receipt';
 type Mode = 'SIDE BY SIDE' | 'SLIDER' | 'BLINK' | 'ZOOM';
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const describeError = (error: unknown) => error instanceof Error ? error.message : typeof error === 'object' ? JSON.stringify(error) : String(error);
 const short = (value: string) => value ? `${value.slice(0, 8)}…${value.slice(-6)}` : '—';
 const txLabel = (phase: TxState['phase']) => phase.replaceAll('_', ' ');
 
@@ -69,7 +70,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
       else if (action === 'inspect') call = {address: agreementAddress, functionName: 'inspect', args: []};
       else throw Error('This page is read-only.');
       await submitAndConfirm(wallet.client, call, () => expected(before), setTx);
-    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+    } catch (e) { setError(describeError(e)); }
   };
   const runVaultAction = async (functionName: 'settle'|'claim_owner'|'claim_renter') => {
     try {
@@ -90,7 +91,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
       await wallet.switchStudionet?.();
       const ack = functionName === 'claim_owner' ? 'ack_owner_claim' : 'ack_renter_claim';
       await submitAndConfirm(wallet.client, {address: vaultAddress, functionName: ack, args: [hash]}, async () => { for (let i = 0; i < 24; i++) { const {v} = await read(); if ((functionName === 'claim_owner' && v?.owner_claimed) || (functionName === 'claim_renter' && v?.renter_claimed)) return true; await wait(5000); } return false; }, setTx);
-    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+    } catch (e) { setError(describeError(e)); }
   };
   const expire = async () => { const before = agreement; await submitAndConfirm(wallet.client, {address: agreementAddress, functionName: 'expire', args: []}, async () => { for (let i = 0; i < 12; i++) { const {a} = await read(); if (a?.status === 'CANCELLED' || a?.status === 'DECIDED') return a?.status !== before?.status; await wait(5000); } return false; }, setTx); };
   const status = agreement?.status || 'READING';
