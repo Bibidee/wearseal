@@ -1,5 +1,6 @@
 {
   "status": "NOT_READY",
+  "sourceCommit": "32cbe3c",
   "reason": "Hardened contracts are freshly deployed; a fresh two-party lifecycle and production attestor configuration are still required.",
   "network": "Studionet",
   "chainId": 61999,
