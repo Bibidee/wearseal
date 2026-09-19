@@ -107,6 +107,11 @@ def test_real_pair_settlement_uses_authoritative_agreement(verdict, expected_bps
     assert int(result["owner_claim"]) == expected_bps * 1000 // 10000
     assert int(result["owner_claim"]) + int(result["renter_claim"]) == 1000
     assert agreement.get_agreement()["status"] == "SETTLED"
+    instruction = agreement.settlement_instruction()
+    assert instruction["terminal"] is True
+    assert int(instruction["deposit"]) == 1000
+    assert int(instruction["owner_bps"]) == expected_bps
+    assert int(instruction["renter_bps"]) == 10000 - expected_bps
 
 
 @pytest.mark.direct

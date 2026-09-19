@@ -38,7 +38,7 @@ async function register(escrow, id, renterAddress, amount) {
 }
 
 async function deployRejector() {
-  const source = 'interface IE { function claim(bytes32 id) external; } contract Rejector { function claim(address e, bytes32 id) external { IE(e).claim(id); } receive() external payable { revert(); } }';
+  const source = 'interface IE { function claim(bytes32 id) external; } interface IF { function fund(bytes32 id) external payable; } contract Rejector { bool public reject = true; function setReject(bool value) external { reject = value; } function fund(address e, bytes32 id) external payable { IF(e).fund{value: msg.value}(id); } function claim(address e, bytes32 id) external { IE(e).claim(id); } receive() external payable { if (reject) revert(); } }';
   const output = JSON.parse(solc.compile(JSON.stringify({language: 'Solidity', sources: {'Rejector.sol': {content: source}}, settings: {outputSelection: {'*': {'*': ['abi', 'evm.bytecode.object']}}}})));
   const artifact = output.contracts['Rejector.sol'].Rejector;
   const hash = await ownerClient.deployContract({abi: artifact.abi, bytecode: `0x${artifact.evm.bytecode.object}`});
@@ -88,4 +88,23 @@ test('a failed recipient transfer preserves the claim for retry', async () => {
   await tx(relayerClient, {address: escrow, abi, functionName: 'setPayout', args: [id, rejector, amount, renter.address, 0n]});
   await assert.rejects(() => tx(ownerClient, {address: rejector, abi: [{type: 'function', name: 'claim', stateMutability: 'nonpayable', inputs: [{name: 'e', type: 'address'}, {name: 'id', type: 'bytes32'}], outputs: []}], functionName: 'claim', args: [escrow, id]}));
   assert.equal(await publicClient.readContract({address: escrow, abi, functionName: 'getClaimable', args: [id, rejector]}), amount);
+});
+
+test('cancellation refund is relayer-authorized, exact, one-time and retryable', async () => {
+  const escrow = await deploy();
+  const rejector = await deployRejector();
+  const id = pad('0x' + 'dd'.repeat(20), {size: 32});
+  const amount = parseEther('0.4');
+  await register(escrow, id, rejector, amount);
+  await tx(ownerClient, {address: rejector, abi: [{type: 'function', name: 'fund', stateMutability: 'payable', inputs: [{name: 'e', type: 'address'}, {name: 'id', type: 'bytes32'}], outputs: []}], functionName: 'fund', args: [escrow, id], value: amount});
+  await tx(relayerClient, {address: escrow, abi, functionName: 'authorizeRefund', args: [id, rejector, amount]});
+  const refundState = await publicClient.readContract({address: escrow, abi, functionName: 'getRefundState', args: [id]});
+  assert.equal(refundState[0], true); assert.equal(refundState[1], true); assert.equal(refundState[2].toLowerCase(), rejector.toLowerCase()); assert.equal(refundState[3], amount);
+  await assert.rejects(() => tx(ownerClient, {address: rejector, abi: [{type: 'function', name: 'claim', stateMutability: 'nonpayable', inputs: [{name: 'e', type: 'address'}, {name: 'id', type: 'bytes32'}], outputs: []}], functionName: 'claim', args: [escrow, id]}));
+  assert.equal(await publicClient.readContract({address: escrow, abi, functionName: 'getClaimable', args: [id, rejector]}), amount);
+  await tx(ownerClient, {address: rejector, abi: [{type: 'function', name: 'setReject', stateMutability: 'nonpayable', inputs: [{name: 'value', type: 'bool'}], outputs: []}], functionName: 'setReject', args: [false]});
+  await tx(ownerClient, {address: rejector, abi: [{type: 'function', name: 'claim', stateMutability: 'nonpayable', inputs: [{name: 'e', type: 'address'}, {name: 'id', type: 'bytes32'}], outputs: []}], functionName: 'claim', args: [escrow, id]});
+  assert.equal(await publicClient.readContract({address: escrow, abi, functionName: 'getClaimable', args: [id, rejector]}), 0n);
+  await assert.rejects(() => tx(relayerClient, {address: escrow, abi, functionName: 'authorizeRefund', args: [id, rejector, amount]}));
+  await assert.rejects(() => tx(relayerClient, {address: escrow, abi, functionName: 'setPayout', args: [id, owner.address, amount, rejector, 0n]}));
 });

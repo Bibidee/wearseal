@@ -1,0 +1,77 @@
+{
+  "network": "Studionet",
+  "chainId": 61999,
+  "signer": "0xf883bCE8FcB120F714B147446342D7E4545Bc988",
+  "evidence": {
+    "sources": [
+      {
+        "path": "contracts/wearseal_agreement.py",
+        "bytes": 15175,
+        "sha256": "f09c3801b96a59245f4260b736673884aa65b9452959afa0228173915a9ad87d"
+      },
+      {
+        "path": "contracts/wearseal_vault.py",
+        "bytes": 5111,
+        "sha256": "65485db385bd0196753d78d1276ac5e7bc1061e4b6b5f19a2eec3de04a2aea02"
+      }
+    ],
+    "agreement": {
+      "address": "0xe06eB8DBf8959dA2713594c3E170cBD41Ce020A2",
+      "tx": "0xe803485aa929897018f804df2c9fadec46bf7a56a96aaf4a8f3ef1676d9ae5a8",
+      "execution": "SUCCESS",
+      "sourceSha256": "f09c3801b96a59245f4260b736673884aa65b9452959afa0228173915a9ad87d"
+    },
+    "vault": {
+      "address": "0x020E528742b9E774Ef0Bd13d866981B8C010C771",
+      "tx": "0x8df99f04f74c4a20e21fb486988d20daba530451d757ef7d4ae7fb1d02d9f086",
+      "execution": "SUCCESS",
+      "sourceSha256": "65485db385bd0196753d78d1276ac5e7bc1061e4b6b5f19a2eec3de04a2aea02"
+    },
+    "binding": {
+      "tx": "0xa89577ebbd84b92d5a1d68b7de0226cb8577315a0c3c4ca080fa13a7bb5a4473",
+      "execution": "SUCCESS"
+    },
+    "readback": {
+      "agreement": {
+        "checkout_hash": "0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb",
+        "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
+        "damage_level": "",
+        "damage_regions": [],
+        "deadline": 1790433000,
+        "definition_hash": "",
+        "deposit": 1000000000000000,
+        "item_label": "WearSeal demo camera",
+        "material_bps": 10000,
+        "minor_bps": 1500,
+        "new_damage_present": "",
+        "owner": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+        "reason": "",
+        "reinspection_count": 0,
+        "renter": "0x7eb2a4b4e913df62eae807ef60509b3b7284c7fa",
+        "return_hash": "",
+        "return_url": "",
+        "rubric": "Normal wear is acceptable; scratches are minor; cracks or missing parts are material.",
+        "same_item": "",
+        "same_item_confidence": "",
+        "serial_hash": "fixture-serial-hash",
+        "status": "DRAFT",
+        "vault": "0x020e528742b9e774ef0bd13d866981b8c010c771",
+        "verdict": ""
+      },
+      "vault": {
+        "agreement": "0xe06eb8dbf8959da2713594c3e170cbd41ce020a2",
+        "attestor": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+        "credited": 0,
+        "funding_tx": "",
+        "owner_claim": 0,
+        "owner_claim_tx": "",
+        "owner_claimed": false,
+        "payout_mode": "BASE_SEPOLIA_PULL_ESCROW",
+        "renter_claim": 0,
+        "renter_claim_tx": "",
+        "renter_claimed": false,
+        "settled": false
+      }
+    }
+  }
+}

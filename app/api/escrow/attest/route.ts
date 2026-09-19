@@ -9,15 +9,16 @@ const escrowAbi = parseAbi([
   'function fund(bytes32 agreementId)',
   'function claim(bytes32 agreementId)',
   'function getPool(bytes32) view returns (uint256,uint256,bool)',
+  'function getRefundState(bytes32) view returns (bool,bool,address,uint256)',
   'event Claimed(bytes32 indexed agreementId,address indexed recipient,uint256 amount)',
 ]);
 const agreementAbi = parseAbi(['function get_agreement() view returns (address owner,address renter,string item_label,string serial_hash,string rubric,string checkout_url,string checkout_hash,uint256 deposit,uint256 minor_bps,uint256 material_bps,uint256 deadline,string status,string definition_hash,address vault,string return_url,string return_hash,string verdict,string same_item,string reason,string same_item_confidence,string new_damage_present,string damage_level,string damage_regions,uint256 reinspection_count)']);
-const vaultAbi = parseAbi(['function get_vault() view returns (address agreement,address attestor,uint256 credited,bool settled,uint256 owner_claim,uint256 renter_claim,bool owner_claimed,bool renter_claimed,string funding_tx,string owner_claim_tx,string renter_claim_tx,string payout_mode)','function deposit(uint256 amount,string fundingTx)','function ack_owner_claim(string payoutTx)','function ack_renter_claim(string payoutTx)']);
+const vaultAbi = parseAbi(['function get_vault() view returns (address agreement,address attestor,uint256 credited,bool settled,uint256 owner_claim,uint256 renter_claim,bool owner_claimed,bool renter_claimed,string funding_tx,string owner_claim_tx,string renter_claim_tx,string payout_mode)','function deposit(uint256 amount,string fundingTx)','function ack_owner_claim(string payoutTx)','function ack_renter_claim(string payoutTx)','function refund_cancelled(string payoutTx)']);
 
 export async function POST(request: Request) {
   try {
     const body = await request.json() as {agreement?: string; kind?: string; tx?: string};
-    if (!body.agreement || !/^0x[0-9a-fA-F]{40}$/.test(body.agreement) || !body.tx || !/^0x[0-9a-fA-F]{64}$/.test(body.tx) || !['funding','owner_claim','renter_claim'].includes(body.kind || '')) return NextResponse.json({error: 'Invalid attestation request'}, {status: 400});
+    if (!body.agreement || !/^0x[0-9a-fA-F]{40}$/.test(body.agreement) || !body.tx || !/^0x[0-9a-fA-F]{64}$/.test(body.tx) || !['funding','owner_claim','renter_claim','refund'].includes(body.kind || '')) return NextResponse.json({error: 'Invalid attestation request'}, {status: 400});
     const key = process.env.WEARSEAL_STUDIONET_PRIVATE_KEY;
     if (!key) return NextResponse.json({error: 'Studionet attestor is not configured'}, {status: 503});
     const escrow = (process.env.NEXT_PUBLIC_BASE_ESCROW_ADDRESS || '0x9d0baedb946036a99616c8abecc14f122e21e897') as `0x${string}`;
@@ -40,6 +41,16 @@ export async function POST(request: Request) {
       const pool = await base.readContract({address: escrow, abi: escrowAbi, functionName: 'getPool', args: [id]});
       if (pool[0] !== BigInt(agreement.deposit) || pool[1] !== 0n || pool[2]) return NextResponse.json({error: 'Base collateral readback is not an unfunded exact pool'}, {status: 409});
       const hash = await client.writeContract({address: vaultAddress, abi: vaultAbi, functionName: 'deposit', args: [BigInt(agreement.deposit), body.tx]});
+      return NextResponse.json({hash});
+    }
+    if (body.kind === 'refund') {
+      if (decoded.functionName !== 'claim' || String(agreement.status) !== 'CANCELLED' || vault.settled || BigInt(vault.credited) <= 0n) return NextResponse.json({error: 'Refund transaction is not valid for the cancelled Agreement'}, {status: 409});
+      if (getAddress(String(transaction.from)) !== getAddress(String(agreement.renter))) return NextResponse.json({error: 'Refund claimant is not the renter'}, {status: 409});
+      const logs = parseEventLogs({abi: escrowAbi, logs: receipt.logs, eventName: 'Claimed'});
+      const claimed = logs.find(log => getAddress(String(log.args.recipient)) === getAddress(String(agreement.renter)) && String(log.args.agreementId).toLowerCase() === id.toLowerCase());
+      if (!claimed || BigInt(claimed.args.amount) !== BigInt(vault.credited)) return NextResponse.json({error: 'Refund amount does not match authoritative Vault credit'}, {status: 409});
+      const writeContract = client.writeContract as unknown as (args: Record<string, unknown>) => Promise<`0x${string}`>;
+      const hash = await writeContract({address: vaultAddress, abi: vaultAbi, functionName: 'refund_cancelled', args: [body.tx], leaderOnly: true});
       return NextResponse.json({hash});
     }
     if (decoded.functionName !== 'claim') return NextResponse.json({error: 'Claim attestation requires a claim transaction'}, {status: 409});

@@ -1,0 +1,283 @@
+{
+  "network": "Studionet 61999 + Base Sepolia 84532",
+  "escrow": "0xCc4d1db40a7b1CCD1ab3FeD6e7b35f541c3f40aB",
+  "owner": "0xf883bCE8FcB120F714B147446342D7E4545Bc988",
+  "renter": "0x7eB2a4B4e913Df62eAe807eF60509B3B7284C7FA",
+  "attestor": "0xf883bCE8FcB120F714B147446342D7E4545Bc988",
+  "normal": {
+    "pair": {
+      "agreement": "0x2CBEf47b5c7939120215175bE3009cf0589ed778",
+      "vault": "0xd7dCDfE4019860476d7BB256478004944213e9d0",
+      "deployment": {
+        "agreement": {
+          "tx": "0x96a13b775621f91996e98a95bebe96acee3e99bdda8fbf8e7745ce754fd8d4b8",
+          "address": "0x2CBEf47b5c7939120215175bE3009cf0589ed778"
+        },
+        "vault": {
+          "tx": "0x44ed05543e9d7f4758fafc075edc09ad7956967c6addd9a61604d4f6b9f1a512",
+          "address": "0xd7dCDfE4019860476d7BB256478004944213e9d0"
+        },
+        "binding": "0xb1cebce9befbe097caa17f0d9cd5328855ad160e5143b11a8e23068cefa73110"
+      },
+      "initial": {
+        "agreement": {
+          "checkout_hash": "0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb",
+          "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
+          "damage_level": "",
+          "damage_regions": [],
+          "deadline": 1789832509,
+          "definition_hash": "",
+          "deposit": 1000000000000000,
+          "item_label": "WearSeal normal final path",
+          "material_bps": 10000,
+          "minor_bps": 1500,
+          "new_damage_present": "",
+          "owner": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+          "reason": "",
+          "reinspection_count": 0,
+          "renter": "0x7eb2a4b4e913df62eae807ef60509b3b7284c7fa",
+          "return_hash": "",
+          "return_url": "",
+          "rubric": "Normal wear is acceptable; scratches are minor; cracks or missing parts are material.",
+          "same_item": "",
+          "same_item_confidence": "",
+          "serial_hash": "final-verification",
+          "status": "DRAFT",
+          "vault": "0xd7dcdfe4019860476d7bb256478004944213e9d0",
+          "verdict": ""
+        },
+        "vault": {
+          "agreement": "0x2cbef47b5c7939120215175be3009cf0589ed778",
+          "attestor": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+          "credited": 0,
+          "funding_tx": "",
+          "owner_claim": 0,
+          "owner_claim_tx": "",
+          "owner_claimed": false,
+          "payout_mode": "BASE_SEPOLIA_PULL_ESCROW",
+          "renter_claim": 0,
+          "renter_claim_tx": "",
+          "renter_claimed": false,
+          "settled": false
+        }
+      }
+    },
+    "funding": {
+      "definition": "0x7a6abd71ac4526920532eebeed45b9362d6b0e1814a3109b1b727c4f40b123ef",
+      "accepted": "0xe948baf0b7c7c32646d84d443d4ce4313749853a1ab5cb6aa91a58d68749437e",
+      "registered": "0x7815590475bd59ab18b0ddd039519e2c2feaa5d3d393dcb5694cbea0b27aa713",
+      "funded": "0x0c730dcf15d5a44d6dc2c8132b02eb17dbeb123c875bfbace6868effd03b1dea",
+      "fundingAck": "0xc7b48d3aec8f5ea6dd2429ed33a6ca7edac5b0c5a9f74ef965709dd2e984c9f0"
+    },
+    "returned": "0xa379c4679bc51a618fa854df89561283abdea9af7098969986f8844e275507b6",
+    "inspected": "0xdf6eeb3637f19878b4e1c8eb2ebc7614b9328a28523e40cda5388300c6eaccbc",
+    "verdict": {
+      "verdict": "MINOR_DAMAGE",
+      "same_item": "YES",
+      "same_item_confidence": "HIGH",
+      "new_damage_present": "YES",
+      "damage_level": "MINOR"
+    },
+    "settled": "0xcba6d5e4d30c57813f5213d130d89f20143f1330cacdebebf3ad372e03ee17f5",
+    "instruction": {
+      "deposit": 1000000000000000,
+      "owner": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+      "owner_bps": 1500,
+      "renter": "0x7eb2a4b4e913df62eae807ef60509b3b7284c7fa",
+      "renter_bps": 8500,
+      "terminal": true
+    },
+    "payout": "0x16963d448b23954c9276669c92580737b374f4f02d62023e3d675b9a7f8b413d",
+    "claims": {
+      "owner": "0xc3a08ea2dbb83c3486a1c42ee1bc460183233f8aa51568665f2b83eecf18feaa",
+      "renter": "0xa6bc23c44aa94438fbdaa5731b591bc988538281027cc3e62eea6b36c4956f00"
+    },
+    "acknowledgements": {
+      "owner": "0x65a36891feee21e97919954272dd33177cde9c866146c689ca95e3fd634ba2e1",
+      "renter": "0x81c01e9c574674b459d7ad942c5ded19d33a956eb403fe3ea74a78f6713be4e1"
+    },
+    "balances": {
+      "ownerBefore": "799380198366441",
+      "ownerAfter": "949069752397106",
+      "ownerDelta": "149689554030665",
+      "renterBefore": "197961604498881",
+      "renterAfter": "197961604498881",
+      "renterDelta": "0"
+    },
+    "finalAgreement": {
+      "checkout_hash": "0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb",
+      "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
+      "damage_level": "MINOR",
+      "damage_regions": [
+        "front upper-left to lower-right across circle"
+      ],
+      "deadline": 1789832509,
+      "definition_hash": "0x7a6abd71ac4526920532eebeed45b9362d6b0e1814a3109b1b727c4f40b123ef",
+      "deposit": 1000000000000000,
+      "item_label": "WearSeal normal final path",
+      "material_bps": 10000,
+      "minor_bps": 1500,
+      "new_damage_present": "YES",
+      "owner": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+      "reason": "",
+      "reinspection_count": 1,
+      "renter": "0x7eb2a4b4e913df62eae807ef60509b3b7284c7fa",
+      "return_hash": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d",
+      "return_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/return.png",
+      "rubric": "Normal wear is acceptable; scratches are minor; cracks or missing parts are material.",
+      "same_item": "YES",
+      "same_item_confidence": "HIGH",
+      "serial_hash": "final-verification",
+      "status": "SETTLED",
+      "vault": "0xd7dcdfe4019860476d7bb256478004944213e9d0",
+      "verdict": "MINOR_DAMAGE"
+    },
+    "finalVault": {
+      "agreement": "0x2cbef47b5c7939120215175be3009cf0589ed778",
+      "attestor": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+      "credited": 0,
+      "funding_tx": "0x0c730dcf15d5a44d6dc2c8132b02eb17dbeb123c875bfbace6868effd03b1dea",
+      "owner_claim": 150000000000000,
+      "owner_claim_tx": "0xc3a08ea2dbb83c3486a1c42ee1bc460183233f8aa51568665f2b83eecf18feaa",
+      "owner_claimed": true,
+      "payout_mode": "BASE_SEPOLIA_PULL_ESCROW",
+      "renter_claim": 850000000000000,
+      "renter_claim_tx": "0xa6bc23c44aa94438fbdaa5731b591bc988538281027cc3e62eea6b36c4956f00",
+      "renter_claimed": true,
+      "settled": true
+    },
+    "pool": [
+      "1000000000000000",
+      "1000000000000000",
+      true
+    ],
+    "repeatSettlement": true,
+    "repeatPayout": true
+  },
+  "cancellation": {
+    "pair": {
+      "agreement": "0xc51db280B8Cc7190D7823f843862FF60a1319277",
+      "vault": "0x0450E76BCE590d0499FAF051079a234b7e343f42",
+      "deployment": {
+        "agreement": {
+          "tx": "0x179b1597ea00eedef67170c89e901695a02a9d9522cce3228a725ed86c4a3bfa",
+          "address": "0xc51db280B8Cc7190D7823f843862FF60a1319277"
+        },
+        "vault": {
+          "tx": "0x123a25366ce3af96a3beb55749feb7cb03f9d951161371d852d5d97d26544c3d",
+          "address": "0x0450E76BCE590d0499FAF051079a234b7e343f42"
+        },
+        "binding": "0xc2711656ac0efffd7afbbd1bae0a750783cb9659a3cac863d9ed027ae1b4ffb4"
+      },
+      "initial": {
+        "agreement": {
+          "checkout_hash": "0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb",
+          "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
+          "damage_level": "",
+          "damage_regions": [],
+          "deadline": 1789829354,
+          "definition_hash": "",
+          "deposit": 1000000000000000,
+          "item_label": "WearSeal cancellation final path",
+          "material_bps": 10000,
+          "minor_bps": 1500,
+          "new_damage_present": "",
+          "owner": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+          "reason": "",
+          "reinspection_count": 0,
+          "renter": "0x7eb2a4b4e913df62eae807ef60509b3b7284c7fa",
+          "return_hash": "",
+          "return_url": "",
+          "rubric": "Normal wear is acceptable; scratches are minor; cracks or missing parts are material.",
+          "same_item": "",
+          "same_item_confidence": "",
+          "serial_hash": "final-verification",
+          "status": "DRAFT",
+          "vault": "0x0450e76bce590d0499faf051079a234b7e343f42",
+          "verdict": ""
+        },
+        "vault": {
+          "agreement": "0xc51db280b8cc7190d7823f843862ff60a1319277",
+          "attestor": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+          "credited": 0,
+          "funding_tx": "",
+          "owner_claim": 0,
+          "owner_claim_tx": "",
+          "owner_claimed": false,
+          "payout_mode": "BASE_SEPOLIA_PULL_ESCROW",
+          "renter_claim": 0,
+          "renter_claim_tx": "",
+          "renter_claimed": false,
+          "settled": false
+        }
+      }
+    },
+    "funding": {
+      "definition": "0xd0941a73ce385ce5ddd5ccd1a40b7c621d937b1a8990bb09086962259c0ae2d3",
+      "accepted": "0x2833c56ce101e00b27d0f29a228c584face35355f2e626c2a7fb06e4f5bb635d",
+      "registered": "0xc5bf77fd7d18a198bb37a005333aac5c4e57492af77a9461ce24ce90e2129cd9",
+      "funded": "0x4b672e1635489e5b6da5af97da545c071b0e48c7ef2b26b5480afeddd8a10a72",
+      "fundingAck": "0xbd2773ef55e95e45451f7539cb8a57d058e50411b386b588a32bf4d3240058a9"
+    },
+    "expired": "0x227e0a4843f3f9fdc2d0745e846eb0187a2233028f1b1c7f7313ed9adc661526",
+    "authorized": "0xc6e93e858286bc83d01491bd237ab4e484007a78c0662e11a1d23e92b5a2692a",
+    "refund": "0xd464e0cc4e4a803da9ef82267449dae5b3687c0bdfa927ea0364ab626ec7d0b6",
+    "acknowledgement": "0x31533d91c31f1492687f2ffac6042318328be5b394509082578c3cea8626f07d",
+    "renterBefore": "46632304349071",
+    "renterAfter": "46632304349071",
+    "renterDelta": "0",
+    "finalAgreement": {
+      "checkout_hash": "0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb",
+      "checkout_url": "https://raw.githubusercontent.com/Bibidee/wearseal/main/public/fixtures/checkout.png",
+      "damage_level": "",
+      "damage_regions": [],
+      "deadline": 1789829354,
+      "definition_hash": "0xd0941a73ce385ce5ddd5ccd1a40b7c621d937b1a8990bb09086962259c0ae2d3",
+      "deposit": 1000000000000000,
+      "item_label": "WearSeal cancellation final path",
+      "material_bps": 10000,
+      "minor_bps": 1500,
+      "new_damage_present": "",
+      "owner": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+      "reason": "",
+      "reinspection_count": 0,
+      "renter": "0x7eb2a4b4e913df62eae807ef60509b3b7284c7fa",
+      "return_hash": "",
+      "return_url": "",
+      "rubric": "Normal wear is acceptable; scratches are minor; cracks or missing parts are material.",
+      "same_item": "",
+      "same_item_confidence": "",
+      "serial_hash": "final-verification",
+      "status": "CANCELLED",
+      "vault": "0x0450e76bce590d0499faf051079a234b7e343f42",
+      "verdict": ""
+    },
+    "finalVault": {
+      "agreement": "0xc51db280b8cc7190d7823f843862ff60a1319277",
+      "attestor": "0xf883bce8fcb120f714b147446342d7e4545bc988",
+      "credited": 0,
+      "funding_tx": "0x4b672e1635489e5b6da5af97da545c071b0e48c7ef2b26b5480afeddd8a10a72",
+      "owner_claim": 0,
+      "owner_claim_tx": "",
+      "owner_claimed": false,
+      "payout_mode": "BASE_SEPOLIA_PULL_ESCROW",
+      "renter_claim": 1000000000000000,
+      "renter_claim_tx": "0xd464e0cc4e4a803da9ef82267449dae5b3687c0bdfa927ea0364ab626ec7d0b6",
+      "renter_claimed": true,
+      "settled": true
+    },
+    "pool": [
+      "1000000000000000",
+      "0",
+      false
+    ],
+    "refundState": [
+      true,
+      true,
+      "0x7eB2a4B4e913Df62eAe807eF60509B3B7284C7FA",
+      "1000000000000000"
+    ],
+    "duplicateRefund": true,
+    "settlementAfterRefund": true
+  }
+}

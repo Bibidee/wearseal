@@ -10,6 +10,7 @@ contract WearSealEscrow {
         uint256 deposited;
         uint256 allocated;
         bool payoutSet;
+        bool refunded;
         bool registered;
         address renter;
         uint256 expectedDeposit;
@@ -26,6 +27,7 @@ contract WearSealEscrow {
     event PayoutSet(bytes32 indexed agreementId, uint256 ownerAmount, uint256 renterAmount);
     event Claimed(bytes32 indexed agreementId, address indexed recipient, uint256 amount);
     event AgreementRegistered(bytes32 indexed agreementId, address indexed renter, uint256 expectedDeposit);
+    event RefundAuthorized(bytes32 indexed agreementId, address indexed renter, uint256 amount);
 
     modifier onlyOwner() { require(msg.sender == owner, "not owner"); _; }
     modifier onlyRelayer() { require(msg.sender == relayer, "not relayer"); _; }
@@ -59,7 +61,7 @@ contract WearSealEscrow {
     function setPayout(bytes32 agreementId, address ownerRecipient, uint256 ownerAmount, address renterRecipient, uint256 renterAmount) external onlyRelayer {
         require(ownerRecipient != address(0) && renterRecipient != address(0), "zero recipient");
         Pool storage pool = pools[agreementId];
-        require(!pool.payoutSet, "payout already set");
+        require(!pool.payoutSet && !pool.refunded, "payout already finalized");
         uint256 total = ownerAmount + renterAmount;
         require(pool.registered && pool.deposited == pool.expectedDeposit, "collateral not verified");
         require(total == pool.deposited && total > 0 && total <= pool.deposited - pool.allocated, "invalid payout");
@@ -70,6 +72,17 @@ contract WearSealEscrow {
         totalClaimable[ownerRecipient] += ownerAmount;
         totalClaimable[renterRecipient] += renterAmount;
         emit PayoutSet(agreementId, ownerAmount, renterAmount);
+    }
+
+    function authorizeRefund(bytes32 agreementId, address renterRecipient, uint256 amount) external onlyRelayer {
+        Pool storage pool = pools[agreementId];
+        require(pool.registered && !pool.payoutSet && !pool.refunded, "refund unavailable");
+        require(renterRecipient == pool.renter && renterRecipient != address(0), "wrong renter");
+        require(pool.deposited == pool.expectedDeposit && amount == pool.deposited && amount > 0, "invalid refund");
+        pool.refunded = true;
+        claimable[agreementId][renterRecipient] += amount;
+        totalClaimable[renterRecipient] += amount;
+        emit RefundAuthorized(agreementId, renterRecipient, amount);
     }
 
     function claim(bytes32 agreementId) external nonReentrant {
@@ -94,5 +107,10 @@ contract WearSealEscrow {
 
     function getClaimable(bytes32 agreementId, address recipient) external view returns (uint256) {
         return claimable[agreementId][recipient];
+    }
+
+    function getRefundState(bytes32 agreementId) external view returns (bool registered, bool refunded, address renter, uint256 expectedDeposit) {
+        Pool storage pool = pools[agreementId];
+        return (pool.registered, pool.refunded, pool.renter, pool.expectedDeposit);
     }
 }
