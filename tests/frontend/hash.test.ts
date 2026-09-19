@@ -1,7 +1,7 @@
 import {describe,it,expect,vi,afterEach} from 'vitest';
 import {validateEvidenceUrl,validSha256} from '../../lib/evidence';
 import {sha256Hex,verifyEvidence} from '../../lib/hash';
-import {classifyReceipt} from '../../lib/genlayer/transaction';
+import {classifyReceipt,submitAndConfirm} from '../../lib/genlayer/transaction';
 import {deadlineFromDate} from '../../lib/deadline';
 afterEach(()=>vi.restoreAllMocks());
 describe('evidence validation and identity',()=>{
@@ -12,5 +12,6 @@ describe('evidence validation and identity',()=>{
 });
 describe('transaction and deadline helpers',()=>{
  it('requires successful execution, not finality alone',()=>{expect(classifyReceipt({tx_execution_result_name:'FINISHED_WITH_RETURN'}).ok).toBe(true);expect(classifyReceipt({txExecutionResultName:'FINISHED_WITH_RETURN'}).ok).toBe(true);expect(classifyReceipt({tx_execution_result_name:'FINISHED_WITH_ERROR'}).ok).toBe(false);expect(classifyReceipt({status:'FINALIZED'}).ok).toBe(false)});
+ it('never converts a reverted transaction into success from a stale readback',async()=>{const states:any[]=[];const client={writeContract:vi.fn().mockResolvedValue('0xabc'),waitForTransactionReceipt:vi.fn().mockResolvedValue({tx_execution_result_name:'ERROR'})};await submitAndConfirm(client,{},async()=>true,state=>states.push(state));expect(states.at(-1)).toMatchObject({phase:'EXECUTION_ERROR',hash:'0xabc'});});
  it('rejects past and absurd deadlines',()=>{expect(()=>deadlineFromDate('2020-01-01',1700000000)).toThrow();expect(()=>deadlineFromDate('2030-01-01',1700000000)).toThrow()});
 });

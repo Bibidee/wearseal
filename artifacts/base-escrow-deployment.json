@@ -1,5 +1,6 @@
 {
-  "network": "Base Sepolia", "chainId": 84532,
+  "network": "Base Sepolia",
+  "chainId": 84532,
   "deployer": "0x4A7D76b8C4668a3426d6d54eC24b41Fa87b532f5",
   "relayer": "0x4A7D76b8C4668a3426d6d54eC24b41Fa87b532f5",
   "address": "0x562f1fc218beccb9e525d148618526a03ae7aa9e",

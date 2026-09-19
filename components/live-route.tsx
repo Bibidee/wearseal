@@ -46,6 +46,13 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
   const read = async () => { if (!agreementAddress) return {a: null, v: null}; const a = await readAgreement(agreementAddress); const v = a?.vault ? await readVault(requireAddress(String(a.vault), 'Vault')) : null; setAgreement(a); setVault(v); try { const p = await readBasePool(agreementAddress); setBasePool(p); if (wallet.account) setBaseClaimable(await readBaseClaimable(agreementAddress, wallet.account)); } catch { setBasePool(undefined); } return {a, v}; };
   useEffect(() => { void read().then(async ({a}) => { if (agreementAddress && action === 'accept' && a?.status === 'DRAFT') setValue(await readCanonicalDefinitionHash(agreementAddress)); }).catch(e => setError(String(e))); }, [agreementAddress, action]);
   useEffect(() => { if (tx.phase === 'CANONICAL_MISMATCH' && agreement?.status === 'SETTLED' && vault?.settled && BigInt(vault?.credited ?? 0) === 0n) { setError(''); setTx(current => ({...current, phase: 'FINALIZED_SUCCESS', error: undefined})); } }, [agreement?.status, vault?.settled, vault?.credited, tx.phase]);
+  useEffect(() => {
+    const terminal = agreement?.status === 'SETTLED' && vault?.settled && BigInt(vault?.credited ?? 0) === 0n;
+    const payoutFinal = vault?.owner_claimed || vault?.renter_claimed;
+    if (terminal && payoutFinal && error) {
+      setError('');
+    }
+  }, [agreement?.status, vault?.settled, vault?.credited, vault?.owner_claimed, vault?.renter_claimed, error, tx.error]);
   useEffect(() => { if (tx.hash) window.sessionStorage.setItem(txStorageKey, JSON.stringify(tx)); }, [tx, txStorageKey]);
   const expected = async (before: any) => { for (let i = 0; i < 12; i++) { const {a, v} = await read(); if (action === 'accept' && a?.status === 'BASELINE_ACCEPTED') return true; if (action === 'fund' && a?.status === 'FUNDED' && v?.credited === BigInt(a.deposit)) return true; if (action === 'return' && a?.status === 'RETURN_SUBMITTED' && a.return_url === value && a.return_hash === hash) return true; if (action === 'inspect' && (a?.status === 'DECIDED' || (a?.status === 'RETURN_SUBMITTED' && BigInt(a.reinspection_count) > BigInt(before?.reinspection_count || 0)))) return true; await wait(5000); } return false; };
   const verifyReturn = async () => { try { setError(''); if (!local) throw Error('Select the local return image first.'); if (!validateEvidenceUrl(value)) throw Error('Use a safe HTTPS return URL.'); const result = await verifyEvidence(local, value); setHash(result.localHash); setMatch(result.match); if (!result.match) throw Error('Local and remote return hashes do not match.'); } catch (e) { setMatch(false); setError(e instanceof Error ? e.message : String(e)); } };
