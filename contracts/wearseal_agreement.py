@@ -113,8 +113,18 @@ class WearsealAgreement(gl.Contract):
 
     @gl.public.write
     def expire(self):
+        # A final decision is immutable.  In particular, expiry must never
+        # rewrite a decided payout-sensitive verdict after the deadline.
         assert now() > self.deadline and self.status not in ["DECIDED", "SETTLED", "CANCELLED"]
-        if self.status in ["DRAFT", "BASELINE_PENDING", "BASELINE_ACCEPTED", "FUNDED"]: self.status = "CANCELLED"; return
+        if self.status in ["DRAFT", "BASELINE_PENDING", "BASELINE_ACCEPTED", "FUNDED"]:
+            # FUNDED cancellation is intentionally non-punitive; the Vault's
+            # refund_cancelled path remains available to the renter.
+            self.status = "CANCELLED"
+            return
+        # A submitted/ongoing inspection that did not reach a final decision
+        # expires to a deterministic, non-punitive decision.  This is the only
+        # branch allowed to write the decision fields during expiry.
+        assert self.status in ["RETURN_SUBMITTED", "INSPECTING"]
         self.verdict = "UNAVAILABLE"; self.same_item = "UNCLEAR"; self.same_item_confidence = "UNCLEAR"; self.new_damage_present = "UNCLEAR"; self.damage_level = "UNCLEAR"; self.damage_regions = "[]"; self.reason = "Deadline expired without reliable attribution"; self.status = "DECIDED"
     @gl.public.write
     def cancel(self): assert gl.message.sender_address in [self.owner, self.renter] and self.status in ["DRAFT", "BASELINE_PENDING", "BASELINE_ACCEPTED"]; self.status = "CANCELLED"
