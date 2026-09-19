@@ -8,12 +8,15 @@
     "start": "next start",
     "lint": "eslint app components lib tests --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --exclude tests/base-escrow.test.mjs",
+    "test:base-escrow": "npm run compile:base-escrow && node --test tests/base-escrow.test.mjs",
     "contract-test": "python -m pytest tests/contract",
     "compile-contracts": "python -m py_compile contracts/wearseal_agreement.py contracts/wearseal_vault.py",
     "deploy:studionet": "node scripts/deploy-studionet.mjs",
     "diagnose:studionet": "node scripts/diagnose-studionet.mjs",
-    "deploy:vault": "node scripts/deploy-vault.mjs"
+    "deploy:vault": "node scripts/deploy-vault.mjs",
+    "compile:base-escrow": "node scripts/compile-base-escrow.mjs",
+    "deploy:base-escrow": "npm run compile:base-escrow && node scripts/deploy-base-escrow.mjs"
   },
   "dependencies": {
     "framer-motion": "13.2.0",
@@ -32,7 +35,9 @@
     "@types/react-dom": "19.2.7",
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.3",
+    "ganache": "^7.9.2",
     "jsdom": "30.0.1",
+    "solc": "^0.8.37",
     "tailwindcss": "4.1.16",
     "typescript": "6.0.3",
     "vite": "^7.1.7",

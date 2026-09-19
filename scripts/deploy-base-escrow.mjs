@@ -1,0 +1,23 @@
+import { createPublicClient, createWalletClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { baseSepolia } from 'viem/chains';
+import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+
+const key = process.env.WEARSEAL_BASE_PRIVATE_KEY;
+if (!key || !/^0x[0-9a-fA-F]{64}$/.test(key)) throw new Error('Set WEARSEAL_BASE_PRIVATE_KEY for this deployment only.');
+const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org';
+const account = privateKeyToAccount(key);
+const transport = http(rpcUrl);
+const publicClient = createPublicClient({ chain: baseSepolia, transport });
+const walletClient = createWalletClient({ account, chain: baseSepolia, transport });
+const source = readFileSync('contracts/base/WearSealEscrow.sol', 'utf8');
+const compiled = JSON.parse(readFileSync('artifacts/base-escrow-compiled.json', 'utf8'));
+const hash = await walletClient.deployContract({ abi: compiled.abi, bytecode: compiled.bytecode, args: [account.address] });
+const receipt = await publicClient.waitForTransactionReceipt({ hash });
+const address = receipt.contractAddress;
+if (!address) throw new Error('Deployment did not return a contract address.');
+const artifact = { network: 'Base Sepolia', chainId: 84532, deployer: account.address, relayer: account.address, address, deploymentTx: hash, sourceSha256: createHash('sha256').update(source).digest('hex'), rpcUrl };
+mkdirSync('artifacts', { recursive: true });
+writeFileSync('artifacts/base-escrow-deployment.json', JSON.stringify(artifact, null, 2));
+console.log(JSON.stringify({ ...artifact, deployerBalanceWei: (await publicClient.getBalance({ address: account.address })).toString() }, null, 2));

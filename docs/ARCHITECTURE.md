@@ -1,3 +1,3 @@
 # Architecture
 
-`WearsealAgreement` owns parties, immutable policy, image commitments, bounded multimodal consensus, lifecycle, and settlement instructions. `WearsealVault` owns native GEN custody and exact-once transfers. The browser is only a wallet client and evidence preparation surface; contracts are authoritative.
+`WearsealAgreement` owns parties, immutable policy, image commitments, bounded multimodal consensus, lifecycle, and settlement instructions on GenLayer Studionet. `WearsealVault` is a Studionet accounting mirror: it records the externally funded amount, allocation, and finalized claim transaction hashes, but never accepts native value or emits asynchronous payouts. `WearSealEscrow` on Base Sepolia holds native ETH, receives the one-time relayer allocation, and lets each recipient pull their own payout atomically. The browser is a wallet client and evidence preparation surface; both chains are authoritative for their respective state.

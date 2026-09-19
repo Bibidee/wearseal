@@ -59,9 +59,7 @@ def test_real_agreement_and_vault_pair_deploys_and_binds(pair_engine):
 @pytest.mark.direct
 def test_real_pair_deposit_and_funding_message(pair_engine):
     engine, agreement_address, vault_address, _, renter = pair_engine
-    engine.vm.value = 1000
-    engine.call_method(vault_address, "deposit", sender=renter)
-    engine.vm.value = 0
+    engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=renter)
     agreement = engine.state.get_contract(agreement_address).instance
     vault = engine.state.get_contract(vault_address).instance
     assert vault.get_vault()["credited"] == 1000
@@ -73,21 +71,17 @@ def test_real_pair_deposit_guards_and_sync_funding(pair_engine):
     engine, agreement_address, vault_address, owner, renter = pair_engine
     agreement = engine.state.get_contract(agreement_address).instance
     agreement.status = "DRAFT"
-    engine.vm.value = 1000
     with pytest.raises(Exception):
-        engine.call_method(vault_address, "deposit", sender=renter)
+        engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=renter)
     agreement.status = "BASELINE_ACCEPTED"
     with pytest.raises(Exception):
-        engine.call_method(vault_address, "deposit", sender=owner)
-    engine.vm.value = 999
+        engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=owner)
     with pytest.raises(Exception):
-        engine.call_method(vault_address, "deposit", sender=renter)
-    engine.vm.value = 1000
-    engine.call_method(vault_address, "deposit", sender=renter)
-    engine.vm.value = 0
+        engine.call_method(vault_address, "deposit", [999, "0x" + "1" * 64], sender=renter)
+    engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=renter)
     assert agreement.get_agreement()["status"] == "FUNDED"
     with pytest.raises(Exception):
-        engine.call_method(vault_address, "deposit", sender=renter)
+        engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=renter)
     agreement.status = "BASELINE_ACCEPTED"
     engine.call_method(vault_address, "sync_funding", sender=owner)
     assert agreement.get_agreement()["status"] == "FUNDED"
@@ -104,9 +98,7 @@ def test_real_pair_deposit_guards_and_sync_funding(pair_engine):
 ])
 def test_real_pair_settlement_uses_authoritative_agreement(verdict, expected_bps, pair_engine):
     engine, agreement_address, vault_address, owner, renter = pair_engine
-    engine.vm.value = 1000
-    engine.call_method(vault_address, "deposit", sender=renter)
-    engine.vm.value = 0
+    engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=renter)
     agreement = engine.state.get_contract(agreement_address).instance
     agreement.status = "DECIDED"
     agreement.verdict = verdict
@@ -122,61 +114,51 @@ def test_real_pair_settlement_uses_authoritative_agreement(verdict, expected_bps
 @pytest.mark.direct
 def test_real_pair_claim_authorization_and_replay_guard(pair_engine):
     engine, agreement_address, vault_address, owner, renter = pair_engine
-    engine.vm.value = 1000
-    engine.call_method(vault_address, "deposit", sender=renter)
-    engine.vm.value = 0
+    engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=renter)
     agreement = engine.state.get_contract(agreement_address).instance
     agreement.status = "DECIDED"
     agreement.verdict = "MINOR_DAMAGE"
     engine.call_method(vault_address, "settle", sender=owner)
     vault = engine.state.get_contract(vault_address).instance
     with pytest.raises(Exception):
-        engine.call_method(vault_address, "claim_owner", sender=renter)
+        engine.call_method(vault_address, "ack_owner_claim", ["0x" + "2" * 64], sender=renter)
     with pytest.raises(Exception):
-        engine.call_method(vault_address, "claim_renter", sender=owner)
+        engine.call_method(vault_address, "ack_renter_claim", ["0x" + "2" * 64], sender=owner)
     assert vault.get_vault()["owner_claimed"] is False
     assert vault.get_vault()["renter_claimed"] is False
 
 
 @pytest.mark.direct
-def test_glsim_documents_unavailable_evm_payout_boundary(pair_engine):
+def test_glsim_external_claim_ack_boundary(pair_engine):
     engine, agreement_address, vault_address, owner, renter = pair_engine
-    engine.vm.value = 1000
-    engine.call_method(vault_address, "deposit", sender=renter)
-    engine.vm.value = 0
+    engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=renter)
     agreement = engine.state.get_contract(agreement_address).instance
     agreement.status = "DECIDED"
     agreement.verdict = "MINOR_DAMAGE"
     engine.call_method(vault_address, "settle", sender=owner)
     vault = engine.state.get_contract(vault_address).instance
-    engine.call_method(vault_address, "claim_owner", sender=owner)
-    # glsim has no EVM recipient implementation; this is not payout success
-    # evidence and exposes why the live child-receipt boundary remains open.
+    engine.call_method(vault_address, "ack_owner_claim", ["0x" + "2" * 64], sender=owner)
     assert vault.get_vault()["owner_claimed"] is True
 
 
 @pytest.mark.direct
 def test_real_pair_cancelled_refund_and_duplicate_guard(pair_engine):
     engine, agreement_address, vault_address, _, renter = pair_engine
-    engine.vm.value = 1000
-    engine.call_method(vault_address, "deposit", sender=renter)
-    engine.vm.value = 0
+    engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=renter)
     agreement = engine.state.get_contract(agreement_address).instance
     agreement.status = "CANCELLED"
-    engine.call_method(vault_address, "refund_cancelled", sender=renter)
+    engine.call_method(vault_address, "refund_cancelled", ["0x" + "2" * 64], sender=renter)
     vault = engine.state.get_contract(vault_address).instance
     result = vault.get_vault()
     assert result["settled"] is True and result["credited"] == 0 and result["renter_claim"] == 1000
     with pytest.raises(Exception):
-        engine.call_method(vault_address, "refund_cancelled", sender=renter)
+        engine.call_method(vault_address, "refund_cancelled", ["0x" + "2" * 64], sender=renter)
 
 
 @pytest.mark.direct
 def test_real_pair_invalid_verdict_and_repeat_settlement_guards(pair_engine):
     engine, agreement_address, vault_address, owner, renter = pair_engine
-    engine.vm.value = 1000
-    engine.call_method(vault_address, "deposit", sender=renter)
-    engine.vm.value = 0
+    engine.call_method(vault_address, "deposit", [1000, "0x" + "1" * 64], sender=renter)
     agreement = engine.state.get_contract(agreement_address).instance
     agreement.status = "DECIDED"
     agreement.verdict = "CORRUPTED"

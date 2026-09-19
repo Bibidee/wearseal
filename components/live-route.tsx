@@ -12,6 +12,7 @@ import {useWallet} from '../lib/wallet/provider';
 import {verifyEvidence} from '../lib/hash';
 import {validateEvidenceUrl} from '../lib/evidence';
 import {explorerTx} from '../lib/genlayer/network';
+import {claimData, fundData, readBaseClaimable, readBasePool, sendBase, waitBaseReceipt, explorerTx as baseExplorerTx} from '../lib/base-escrow';
 
 type Action = 'accept' | 'fund' | 'return' | 'inspect' | 'receipt';
 type Mode = 'SIDE BY SIDE' | 'SLIDER' | 'BLINK' | 'ZOOM';
@@ -26,6 +27,9 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
   const [mode, setMode] = useState<Mode>('SIDE BY SIDE');
   const [agreement, setAgreement] = useState<any>();
   const [vault, setVault] = useState<any>();
+  const [basePool, setBasePool] = useState<any>();
+  const [baseClaimable, setBaseClaimable] = useState<bigint>(0n);
+  const [baseTx, setBaseTx] = useState('');
   const [value, setValue] = useState('');
   const [hash, setHash] = useState('');
   const [local, setLocal] = useState<File>();
@@ -38,14 +42,56 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
   const [error, setError] = useState('');
   const agreementAddress = useMemo(() => { try { return requireAddress(id, 'Agreement'); } catch { return ''; } }, [id]);
   const vaultAddress = agreement?.vault ? String(agreement.vault) : '';
-  const read = async () => { if (!agreementAddress) return {a: null, v: null}; const a = await readAgreement(agreementAddress); const v = a?.vault ? await readVault(requireAddress(String(a.vault), 'Vault')) : null; setAgreement(a); setVault(v); return {a, v}; };
+  const read = async () => { if (!agreementAddress) return {a: null, v: null}; const a = await readAgreement(agreementAddress); const v = a?.vault ? await readVault(requireAddress(String(a.vault), 'Vault')) : null; setAgreement(a); setVault(v); try { const p = await readBasePool(agreementAddress); setBasePool(p); if (wallet.account) setBaseClaimable(await readBaseClaimable(agreementAddress, wallet.account)); } catch { setBasePool(undefined); } return {a, v}; };
   useEffect(() => { void read().catch(e => setError(String(e))); }, [agreementAddress]);
   useEffect(() => { if (tx.phase === 'CANONICAL_MISMATCH' && agreement?.status === 'SETTLED' && vault?.settled && BigInt(vault?.credited ?? 0) === 0n) { setError(''); setTx(current => ({...current, phase: 'FINALIZED_SUCCESS', error: undefined})); } }, [agreement?.status, vault?.settled, vault?.credited, tx.phase]);
   useEffect(() => { if (tx.hash) window.sessionStorage.setItem(txStorageKey, JSON.stringify(tx)); }, [tx, txStorageKey]);
   const expected = async (before: any) => { for (let i = 0; i < 12; i++) { const {a, v} = await read(); if (action === 'accept' && a?.status === 'BASELINE_ACCEPTED') return true; if (action === 'fund' && a?.status === 'FUNDED' && v?.credited === BigInt(a.deposit)) return true; if (action === 'return' && a?.status === 'RETURN_SUBMITTED' && a.return_url === value && a.return_hash === hash) return true; if (action === 'inspect' && (a?.status === 'DECIDED' || (a?.status === 'RETURN_SUBMITTED' && BigInt(a.reinspection_count) > BigInt(before?.reinspection_count || 0)))) return true; await wait(5000); } return false; };
   const verifyReturn = async () => { try { setError(''); if (!local) throw Error('Select the local return image first.'); if (!validateEvidenceUrl(value)) throw Error('Use a safe HTTPS return URL.'); const result = await verifyEvidence(local, value); setHash(result.localHash); setMatch(result.match); if (!result.match) throw Error('Local and remote return hashes do not match.'); } catch (e) { setMatch(false); setError(e instanceof Error ? e.message : String(e)); } };
-  const run = async () => { try { setError(''); if (!wallet?.client || !wallet.account) throw Error('Connect a Studionet wallet first.'); if (!wallet.onStudionet) throw Error('Switch wallet to Studionet 61999.'); const before = agreement; let call: any; if (action === 'accept') call = {address: agreementAddress, functionName: 'accept_baseline', args: [value]}; else if (action === 'fund') call = {address: vaultAddress, functionName: 'deposit', args: [], value: BigInt(agreement.deposit)}; else if (action === 'return') { if (match !== true) throw Error('Verify the local and remote return images first.'); call = {address: agreementAddress, functionName: 'submit_return', args: [value, hash]}; } else if (action === 'inspect') call = {address: agreementAddress, functionName: 'inspect', args: []}; else throw Error('This page is read-only.'); await submitAndConfirm(wallet.client, call, () => expected(before), setTx); } catch (e) { setError(e instanceof Error ? e.message : String(e)); } };
-  const runVaultAction = async (functionName: 'settle'|'claim_owner'|'claim_renter') => { try { setError(''); if (!wallet?.client || !wallet.account) throw Error('Connect a Studionet wallet first.'); if (!wallet.onStudionet) throw Error('Switch wallet to Studionet 61999.'); await submitAndConfirm(wallet.client, {address: vaultAddress, functionName, args: []}, async () => { for (let i = 0; i < 24; i++) { const {a, v} = await read(); const credited = BigInt(v?.credited ?? 0); const settled = v?.settled === true || String(v?.settled).toLowerCase() === 'true' || String(v?.settled) === '1'; if (functionName === 'settle' && String(a?.status).toUpperCase() === 'SETTLED' && settled && credited === 0n) return true; if (functionName === 'claim_owner' && (v?.owner_claimed === true || String(v?.owner_claimed).toLowerCase() === 'true' || String(v?.owner_claimed) === '1')) return true; if (functionName === 'claim_renter' && (v?.renter_claimed === true || String(v?.renter_claimed).toLowerCase() === 'true' || String(v?.renter_claimed) === '1')) return true; await wait(5000); } return false; }, setTx); } catch (e) { setError(e instanceof Error ? e.message : String(e)); } };
+  const run = async () => {
+    try {
+      setError(''); if (!wallet?.client || !wallet.account || !wallet.provider) throw Error('Connect a wallet first.');
+      const before = agreement;
+      if (action === 'fund') {
+        if (!wallet.switchBaseSepolia) throw Error('Base Sepolia wallet switching is unavailable.');
+        await wallet.switchBaseSepolia();
+        const baseHash = await sendBase(wallet.provider, wallet.account, fundData(agreementAddress), `0x${BigInt(agreement.deposit).toString(16).padStart(64, '0')}`);
+        setBaseTx(baseHash);
+        await waitBaseReceipt(wallet.provider, baseHash);
+        await wallet.switchStudionet?.();
+        await submitAndConfirm(wallet.client, {address: vaultAddress, functionName: 'deposit', args: [BigInt(agreement.deposit), baseHash]}, () => expected(before), setTx);
+        return;
+      }
+      if (!wallet.onStudionet) throw Error('Switch wallet to Studionet 61999.');
+      let call: any;
+      if (action === 'accept') call = {address: agreementAddress, functionName: 'accept_baseline', args: [value]};
+      else if (action === 'return') { if (match !== true) throw Error('Verify the local and remote return images first.'); call = {address: agreementAddress, functionName: 'submit_return', args: [value, hash]}; }
+      else if (action === 'inspect') call = {address: agreementAddress, functionName: 'inspect', args: []};
+      else throw Error('This page is read-only.');
+      await submitAndConfirm(wallet.client, call, () => expected(before), setTx);
+    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+  };
+  const runVaultAction = async (functionName: 'settle'|'claim_owner'|'claim_renter') => {
+    try {
+      setError(''); if (!wallet?.client || !wallet.account || !wallet.provider) throw Error('Connect a wallet first.');
+      if (functionName === 'settle') {
+        if (!wallet.onStudionet) throw Error('Switch wallet to Studionet 61999.');
+        await submitAndConfirm(wallet.client, {address: vaultAddress, functionName: 'settle', args: []}, async () => { for (let i = 0; i < 24; i++) { const {a, v} = await read(); if (String(a?.status).toUpperCase() === 'SETTLED' && v?.settled && BigInt(v?.credited ?? 0) === 0n) return true; await wait(5000); } return false; }, setTx);
+        const settled = await readVault(requireAddress(vaultAddress, 'Vault'));
+        const response = await fetch('/api/escrow/relay', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({agreement: agreementAddress, owner: agreement.owner, ownerAmount: String(settled.owner_claim), renter: agreement.renter, renterAmount: String(settled.renter_claim)})});
+        if (!response.ok) throw Error((await response.json()).error || 'Base Sepolia payout allocation failed.');
+        await read(); return;
+      }
+      if (!wallet.switchBaseSepolia) throw Error('Base Sepolia wallet switching is unavailable.');
+      const recipient = functionName === 'claim_owner' ? agreement.owner : agreement.renter;
+      if (wallet.account.toLowerCase() !== String(recipient).toLowerCase()) throw Error('Only the payout recipient can claim this allocation.');
+      await wallet.switchBaseSepolia();
+      const hash = await sendBase(wallet.provider, wallet.account, claimData(agreementAddress)); setBaseTx(hash); await waitBaseReceipt(wallet.provider, hash);
+      await wallet.switchStudionet?.();
+      const ack = functionName === 'claim_owner' ? 'ack_owner_claim' : 'ack_renter_claim';
+      await submitAndConfirm(wallet.client, {address: vaultAddress, functionName: ack, args: [hash]}, async () => { for (let i = 0; i < 24; i++) { const {v} = await read(); if ((functionName === 'claim_owner' && v?.owner_claimed) || (functionName === 'claim_renter' && v?.renter_claimed)) return true; await wait(5000); } return false; }, setTx);
+    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+  };
   const expire = async () => { const before = agreement; await submitAndConfirm(wallet.client, {address: agreementAddress, functionName: 'expire', args: []}, async () => { for (let i = 0; i < 12; i++) { const {a} = await read(); if (a?.status === 'CANCELLED' || a?.status === 'DECIDED') return a?.status !== before?.status; await wait(5000); } return false; }, setTx); };
   const status = agreement?.status || 'READING';
   const stages = ['BASELINE', 'FUNDED', 'RETURN', 'INSPECTION', 'VERDICT', 'SETTLEMENT'];
@@ -59,7 +105,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
       <section className="passport-section"><h3>01 / PEOPLE & POLICY</h3><div className="proof-grid"><div className="proof-item"><label>OWNER</label><div className="person"><Identicon address={agreement.owner}/><code>{short(agreement.owner)}</code></div></div><div className="proof-item"><label>RENTER</label><div className="person"><Identicon address={agreement.renter}/><code>{short(agreement.renter)}</code></div></div><div className="proof-item"><label>POLICY</label><code>{agreement.minor_bps} bps minor / {agreement.material_bps} bps material</code></div></div></section>
       <section className="passport-section"><h3>02 / EVIDENCE INTEGRITY</h3><div className="evidence-grid"><EvidenceCard kind="CHECKOUT" url={agreement.checkout_url} hash={agreement.checkout_hash}/>{agreement.return_url ? <EvidenceCard kind="RETURN" url={agreement.return_url} hash={agreement.return_hash}/> : <div className="proof-item"><div className="eyebrow">RETURN EVIDENCE</div><p className="subhead">Waiting for the renter to submit a verified return image.</p></div>}</div></section>
       {agreement.return_url && <section className="passport-section"><div className="section-head"><div><div className="kicker">INSPECTION ROOM</div><h3>What changed between handoff and return?</h3></div></div><div className="inspection-panel"><InspectionRoom checkoutUrl={agreement.checkout_url} returnUrl={agreement.return_url} mode={mode} onModeChange={setMode}/><div className="result-box"><h4>GENLAYER INSPECTION</h4><div className="verdict">{agreement.verdict || 'PENDING'}</div><div className="result-list"><div className="result-row"><span>Same item</span><span>{agreement.same_item || '—'}</span></div><div className="result-row"><span>Identity confidence</span><span>{agreement.same_item_confidence || '—'}</span></div><div className="result-row"><span>New damage</span><span>{agreement.new_damage_present || '—'}</span></div><div className="result-row"><span>Damage level</span><span>{agreement.damage_level || '—'}</span></div><div className="result-row"><span>Region / reason</span><span>{agreement.damage_regions?.join('; ') || '—'}</span></div></div></div></div></section>}
-      <section className="passport-section"><h3>03 / SETTLEMENT</h3>{settlement && <div className="settlement"><div className="allocation owner"><h4>OWNER · {Number(settlement.owner) * 100 / Number(agreement.deposit || 1)}%</h4><strong>{String(settlement.owner)}</strong><small>Allocation {vault.owner_claim ? 'AVAILABLE' : 'NONE'} · Claim {vault.owner_claimed ? 'FINALIZED' : 'PENDING'}</small></div><div className="allocation renter"><h4>RENTER · {Number(settlement.renter) * 100 / Number(agreement.deposit || 1)}%</h4><strong>{String(settlement.renter)}</strong><small>Allocation {vault.renter_claim ? 'AVAILABLE' : 'NONE'} · Claim {vault.renter_claimed ? 'FINALIZED' : 'PENDING'}</small></div></div>}<p className="subhead">Vault remaining: <strong>{String(vault?.credited || 0)}</strong>. Allocations and claims are shown from authoritative Vault state.</p>{agreement.status === 'DECIDED' && vault && !vault.settled && BigInt(vault.credited || 0) > 0n && <button className="button" onClick={() => runVaultAction('settle')}>{tx.phase === 'IDLE' ? 'SETTLE DEPOSIT →' : tx.phase}</button>}{vault?.settled && wallet.account?.toLowerCase() === agreement.owner?.toLowerCase() && !vault.owner_claimed && BigInt(vault.owner_claim || 0) > 0n && <button className="button" onClick={() => runVaultAction('claim_owner')}>{['IDLE', 'FINALIZED_SUCCESS'].includes(tx.phase) ? 'CLAIM OWNER ALLOCATION →' : tx.phase}</button>}{vault?.settled && wallet.account?.toLowerCase() === agreement.renter?.toLowerCase() && !vault.renter_claimed && BigInt(vault.renter_claim || 0) > 0n && <button className="button" onClick={() => runVaultAction('claim_renter')}>{['IDLE', 'FINALIZED_SUCCESS'].includes(tx.phase) ? 'CLAIM RENTER ALLOCATION →' : tx.phase}</button>}</section>
+      <section className="passport-section"><h3>03 / SETTLEMENT</h3>{settlement && <div className="settlement"><div className="allocation owner"><h4>OWNER · {Number(settlement.owner) * 100 / Number(agreement.deposit || 1)}%</h4><strong>{String(settlement.owner)}</strong><small>Allocation {vault.owner_claim ? 'AVAILABLE' : 'NONE'} · Claim {vault.owner_claimed ? 'FINALIZED' : (baseClaimable > 0n ? 'READY ON BASE' : 'PENDING')}</small></div><div className="allocation renter"><h4>RENTER · {Number(settlement.renter) * 100 / Number(agreement.deposit || 1)}%</h4><strong>{String(settlement.renter)}</strong><small>Allocation {vault.renter_claim ? 'AVAILABLE' : 'NONE'} · Claim {vault.renter_claimed ? 'FINALIZED' : (baseClaimable > 0n ? 'READY ON BASE' : 'PENDING')}</small></div></div>}<p className="subhead">Base Sepolia escrow: <strong>{String(basePool?.deposited || 0n)}</strong> wei deposited; claimable for this wallet <strong>{String(baseClaimable)}</strong>. Studionet records the external finality.</p>{agreement.status === 'DECIDED' && vault && !vault.settled && BigInt(vault.credited || 0) > 0n && <button className="button" onClick={() => runVaultAction('settle')}>{tx.phase === 'IDLE' ? 'SETTLE + ALLOCATE →' : tx.phase}</button>}{vault?.settled && wallet.account?.toLowerCase() === agreement.owner?.toLowerCase() && !vault.owner_claimed && BigInt(vault.owner_claim || 0) > 0n && <button className="button" onClick={() => runVaultAction('claim_owner')}>{['IDLE', 'FINALIZED_SUCCESS'].includes(tx.phase) ? 'CLAIM OWNER ALLOCATION →' : tx.phase}</button>}{vault?.settled && wallet.account?.toLowerCase() === agreement.renter?.toLowerCase() && !vault.renter_claimed && BigInt(vault.renter_claim || 0) > 0n && <button className="button" onClick={() => runVaultAction('claim_renter')}>{['IDLE', 'FINALIZED_SUCCESS'].includes(tx.phase) ? 'CLAIM RENTER ALLOCATION →' : tx.phase}</button>}{baseTx && <a className="mono" href={baseExplorerTx(baseTx)} target="_blank" rel="noreferrer">BASE TRANSACTION {baseTx}</a>}</section>
       <section className="passport-section"><h3>04 / PROOF MODE</h3><button className="button secondary" onClick={() => setProof(!proof)}>{proof ? 'PRODUCT VIEW' : 'PROOF VIEW'}</button>{proof && <div className="proof-grid proof-output"><div className="proof-item"><label>DEFINITION HASH</label><HashDNA hash={agreement.definition_hash}/><code>{agreement.definition_hash}</code></div><div className="proof-item"><label>RETURN HASH</label><code>{agreement.return_hash || '—'}</code></div><div className="proof-item"><label>CHAIN</label><code>GENLAYER STUDIONET · 61999</code></div></div>}</section>
     </>}
     {error && <div className="tx-banner"><strong>CANONICAL ERROR</strong>{error}</div>}

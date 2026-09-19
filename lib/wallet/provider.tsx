@@ -4,6 +4,7 @@ import {createContext, useContext, useEffect, useState} from 'react';
 import {createClient} from 'genlayer-js';
 import {studionet} from 'genlayer-js/chains';
 import {isStudionet, STUDIONET} from '../genlayer/network';
+import {BASE_CHAIN_ID} from '../base-escrow';
 
 export type Provider = {request(a: {method: string; params?: unknown[]}): Promise<unknown>; on?(e: string, f: (...a: any[]) => void): void; removeListener?(e: string, f: (...a: any[]) => void): void};
 
@@ -57,8 +58,25 @@ export function WalletProvider({children}: {children: React.ReactNode}) {
     setError('');
   };
 
+  const switchStudionet = async () => {
+    if (!provider) throw Error('No injected wallet found');
+    await ensureStudionet(provider);
+    setChainId(await provider.request({method: 'eth_chainId'}) as string);
+  };
+
+  const switchBaseSepolia = async () => {
+    if (!provider) throw Error('No injected wallet found');
+    try { await provider.request({method: 'wallet_switchEthereumChain', params: [{chainId: `0x${BASE_CHAIN_ID.toString(16)}`}]}); }
+    catch (error) {
+      if ((error as {code?: number}).code !== 4902) throw error;
+      await provider.request({method: 'wallet_addEthereumChain', params: [{chainId: `0x${BASE_CHAIN_ID.toString(16)}`, chainName: 'Base Sepolia', nativeCurrency: {name: 'Ether', symbol: 'ETH', decimals: 18}, rpcUrls: ['https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org']}]});
+      await provider.request({method: 'wallet_switchEthereumChain', params: [{chainId: `0x${BASE_CHAIN_ID.toString(16)}`}]});
+    }
+    setChainId(await provider.request({method: 'eth_chainId'}) as string);
+  };
+
   const client = provider && account ? createClient({chain: studionet, account, provider}) : undefined;
-  return <C.Provider value={{account, chainId, client, connect, disconnect, error, onStudionet: isStudionet(chainId)}}>{children}</C.Provider>;
+  return <C.Provider value={{account, chainId, client, provider, connect, disconnect, switchStudionet, switchBaseSepolia, error, onStudionet: isStudionet(chainId), onBaseSepolia: chainId === `0x${BASE_CHAIN_ID.toString(16)}`}}>{children}</C.Provider>;
 }
 
 export const useWallet = () => useContext(C);
