@@ -1,6 +1,7 @@
 'use client';
 /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 import {useEffect, useMemo, useState} from 'react';
+import Link from 'next/link';
 import SiteNav from './site-nav';
 import EvidenceCard from './evidence-card';
 import Identicon from './identicon';
@@ -44,7 +45,26 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
   const [error, setError] = useState('');
   const agreementAddress = useMemo(() => { try { return requireAddress(id, 'Agreement'); } catch { return ''; } }, [id]);
   const vaultAddress = agreement?.vault ? String(agreement.vault) : '';
-  const read = async () => { if (!agreementAddress) return {a: null, v: null}; const a = await readAgreement(agreementAddress); const v = a?.vault ? await readVault(requireAddress(String(a.vault), 'Vault')) : null; setAgreement(a); setVault(v); try { const p = await readBasePool(agreementAddress); setBasePool(p); if (wallet.account) setBaseClaimable(await readBaseClaimable(agreementAddress, wallet.account)); } catch { setBasePool(undefined); } try { const response = await fetch(`/api/escrow/recover?agreement=${encodeURIComponent(agreementAddress)}`, {cache: 'no-store'}); if (response.ok) { const recovered = await response.json(); setRecovery(recovered); const recoveredTx = action === 'fund' ? recovered.fundingTx : action === 'refund' ? recovered.refundTx : wallet.account?.toLowerCase() === String(a?.owner || '').toLowerCase() ? recovered.ownerClaimTx : recovered.renterClaimTx; if (recoveredTx) setBaseTx(recoveredTx); } } catch { /* Base RPC recovery is retried on the next authoritative read. */ } return {a, v}; };
+  const read = async () => {
+    if (!agreementAddress) return {a: null, v: null};
+    const a = await readAgreement(agreementAddress);
+    let v: any = null;
+    try { v = a?.vault ? await readVault(requireAddress(String(a.vault), 'Vault')) : null; }
+    catch { setError('Agreement state is available, but the bound Vault state is temporarily unavailable. No payment action will be repeated.'); }
+    setAgreement(a); setVault(v);
+    try { const p = await readBasePool(agreementAddress); setBasePool(p); if (wallet.account) setBaseClaimable(await readBaseClaimable(agreementAddress, wallet.account)); }
+    catch { setBasePool(undefined); }
+    try {
+      const response = await fetch(`/api/escrow/recover?agreement=${encodeURIComponent(agreementAddress)}`, {cache: 'no-store'});
+      if (response.ok) {
+        const recovered = await response.json(); setRecovery(recovered);
+        const recoveredTx = action === 'fund' ? recovered.fundingTx : action === 'refund' ? recovered.refundTx : wallet.account?.toLowerCase() === String(a?.owner || '').toLowerCase() ? recovered.ownerClaimTx : recovered.renterClaimTx;
+        if (recoveredTx) setBaseTx(recoveredTx);
+        if (recovered.vaultError) setError(`Bound Vault readback unavailable: ${recovered.vaultError}`);
+      } else if (basePool?.deposited) setError('Base escrow is funded, but verified recovery evidence is temporarily unavailable. No second payment will be requested.');
+    } catch { /* Base RPC recovery is retried on the next authoritative read. */ }
+    return {a, v};
+  };
   useEffect(() => { void read().then(async ({a}) => { if (agreementAddress && action === 'accept' && a?.status === 'DRAFT') setValue(await readCanonicalDefinitionHash(agreementAddress)); }).catch(e => setError(String(e))); }, [agreementAddress, action]);
   useEffect(() => { if (tx.phase === 'CANONICAL_MISMATCH' && agreement?.status === 'SETTLED' && vault?.settled && BigInt(vault?.credited ?? 0) === 0n) { setError(''); setTx(current => ({...current, phase: 'FINALIZED_SUCCESS', error: undefined})); } }, [agreement?.status, vault?.settled, vault?.credited, tx.phase]);
   useEffect(() => {
@@ -62,11 +82,14 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
       setError(''); if (!wallet?.client || !wallet.account || !wallet.provider) throw Error('Connect a wallet first.');
       const before = agreement;
       if (action === 'fund') {
+        if (wallet.account.toLowerCase() !== String(agreement.renter).toLowerCase()) throw Error('Only the designated renter wallet can fund this Agreement. Switch to the renter account.');
         if (!wallet.switchBaseSepolia) throw Error('Base Sepolia wallet switching is unavailable.');
         await wallet.switchBaseSepolia();
         const registration = await fetch('/api/escrow/register', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({agreement: agreementAddress})});
         if (!registration.ok) throw Error((await registration.json()).error || 'Base escrow registration failed.');
+        const baseDeposited = BigInt(basePool?.deposited ?? 0n) > 0n;
         const existingFunding = recovery?.fundingTx as string | null | undefined;
+        if (baseDeposited && !existingFunding) throw Error('Base escrow already contains this deposit, but its verified transaction evidence is temporarily unavailable. No second deposit will be requested.');
         const baseHash = existingFunding || await sendBase(wallet.provider, wallet.account, fundData(agreementAddress), `0x${BigInt(agreement.deposit).toString(16).padStart(64, '0')}`);
         if (!existingFunding) await waitBaseReceipt(wallet.provider, baseHash);
         setBaseTx(baseHash);
@@ -138,6 +161,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
     <div className="passport-top"><div><div className="kicker">WEARSEAL CONDITION PASSPORT</div><h1 className="page-title">{agreement?.item_label || 'Live Agreement'}</h1><p className="subhead">A hash-bound equipment record for a two-party rental. The state below is read directly from Agreement {short(agreementAddress)}.</p><span className={`status-pill ${['SETTLED', 'BASELINE_ACCEPTED', 'FUNDED', 'DECIDED'].includes(status) ? 'good' : ''}`}>{status}</span></div><div className="seal">{status === 'SETTLED' ? 'AGREEMENT CLOSED' : status === 'DECIDED' ? 'CONDITION SEALED' : 'BASELINE RECORD'}</div></div>
     {agreement && <>
       <div className="passport-meta"><div className="meta-cell"><label>AGREEMENT</label><strong className="mono">{short(agreementAddress)}</strong></div><div className="meta-cell"><label>BASE SEPOLIA DEPOSIT</label><strong>{String(agreement.deposit)} wei ETH</strong></div><div className="meta-cell"><label>DEADLINE</label><strong>{new Date(Number(agreement.deadline) * 1000).toLocaleDateString()}</strong></div><div className="meta-cell"><label>VAULT</label><strong className="mono">{short(vaultAddress)}</strong></div></div>
+      <section className="passport-section"><h3>00 / NEXT ACTION</h3>{status === 'DRAFT' && <div><p className="subhead">The designated renter wallet must accept this baseline on GenLayer Studionet.</p><Link className="button" href={`/a/${agreementAddress}/baseline`}>ACCEPT BASELINE →</Link></div>}{status === 'BASELINE_ACCEPTED' && ((basePool && BigInt(basePool.deposited || 0) > 0n) || Boolean(recovery?.fundingTx)) && <div><p className="subhead">BASE DEPOSIT CONFIRMED — GENLAYER ACKNOWLEDGEMENT PENDING. Reuse the verified payment; no second deposit is needed.</p><Link className="button" href={`/a/${agreementAddress}/fund`}>RETRY FUNDING ACKNOWLEDGEMENT →</Link></div>}{status === 'BASELINE_ACCEPTED' && !((basePool && BigInt(basePool.deposited || 0) > 0n) || Boolean(recovery?.fundingTx)) && basePool && <div><p className="subhead">The renter must deposit the exact security on Base Sepolia.</p><Link className="button" href={`/a/${agreementAddress}/fund`}>FUND AGREEMENT →</Link></div>}{status === 'BASELINE_ACCEPTED' && !basePool && !recovery && <p className="subhead">Reading Base Sepolia escrow state before offering a funding action…</p>}{status === 'FUNDED' && <div><p className="subhead">Funding is synchronized. The renter can submit the return evidence.</p><Link className="button" href={`/a/${agreementAddress}/return`}>SUBMIT RETURN EVIDENCE →</Link></div>}{status === 'RETURN_SUBMITTED' && <div><p className="subhead">The evidence pair is ready for the inspection.</p><Link className="button" href={`/a/${agreementAddress}/inspect`}>START INSPECTION →</Link></div>}{status === 'DECIDED' && vault && !vault.settled && <div><p className="subhead">The verdict is finalized. The owner can settle the Agreement.</p><Link className="button" href={`/receipt/${agreementAddress}`}>SETTLE AGREEMENT →</Link></div>}{status === 'SETTLED' && vault?.settled && !basePool?.payoutSet && <div><p className="subhead">GenLayer settlement is complete; Base payout allocation still needs to be finalized.</p><Link className="button" href={`/receipt/${agreementAddress}`}>RETRY PAYOUT ALLOCATION →</Link></div>}</section>
       <div className="lifecycle">{stages.map((stage, i) => <div className={`stage ${stageState(stage)}`} key={stage}><b>0{i + 1}</b><br/>{stage}</div>)}</div>
       <section className="passport-section"><h3>01 / PEOPLE & POLICY</h3><div className="proof-grid"><div className="proof-item"><label>OWNER</label><div className="person"><Identicon address={agreement.owner}/><code>{short(agreement.owner)}</code></div></div><div className="proof-item"><label>RENTER</label><div className="person"><Identicon address={agreement.renter}/><code>{short(agreement.renter)}</code></div></div><div className="proof-item"><label>POLICY</label><code>{agreement.minor_bps} bps minor / {agreement.material_bps} bps material</code></div></div></section>
       <section className="passport-section"><h3>02 / EVIDENCE INTEGRITY</h3><div className="evidence-grid"><EvidenceCard kind="CHECKOUT" url={agreement.checkout_url} hash={agreement.checkout_hash}/>{agreement.return_url ? <EvidenceCard kind="RETURN" url={agreement.return_url} hash={agreement.return_hash}/> : <div className="proof-item"><div className="eyebrow">RETURN EVIDENCE</div><p className="subhead">Waiting for the renter to submit a verified return image.</p></div>}</div></section>
