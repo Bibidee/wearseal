@@ -130,6 +130,6 @@ class WearsealAgreement(gl.Contract):
     def cancel(self): assert gl.message.sender_address in [self.owner, self.renter] and self.status in ["DRAFT", "BASELINE_PENDING", "BASELINE_ACCEPTED"]; self.status = "CANCELLED"
     @gl.public.view
     def settlement_instruction(self) -> dict:
-        assert self.status == "DECIDED"; mapping = {"NO_NEW_DAMAGE": 0, "NORMAL_WEAR": 0, "INCONCLUSIVE": 0, "UNAVAILABLE": 0, "MINOR_DAMAGE": self.minor_bps, "MATERIAL_DAMAGE": self.material_bps}; assert self.verdict in mapping; owner_bps = mapping[self.verdict]; return {"owner": self.owner, "renter": self.renter, "deposit": self.deposit, "owner_bps": owner_bps, "renter_bps": 10000 - owner_bps, "terminal": True}
+        assert self.status in ("DECIDED", "SETTLED"); mapping = {"NO_NEW_DAMAGE": 0, "NORMAL_WEAR": 0, "INCONCLUSIVE": 0, "UNAVAILABLE": 0, "MINOR_DAMAGE": self.minor_bps, "MATERIAL_DAMAGE": self.material_bps}; assert self.verdict in mapping; owner_bps = mapping[self.verdict]; return {"owner": self.owner, "renter": self.renter, "deposit": self.deposit, "owner_bps": owner_bps, "renter_bps": 10000 - owner_bps, "terminal": True}
     @gl.public.write
     def mark_settled(self): assert gl.message.sender_address == self.vault and self.status == "DECIDED"; self.status = "SETTLED"

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const agreementAddress = getAddress(body.agreement);
     const genlayer = createClient({chain: studionet});
     const agreement = await genlayer.readContract({address: agreementAddress, functionName: 'get_agreement', args: []}) as any;
-    if (String(agreement.status) !== 'DECIDED') return NextResponse.json({error: 'Agreement has no finalized decision'}, {status: 409});
+    if (!['DECIDED', 'SETTLED'].includes(String(agreement.status))) return NextResponse.json({error: 'Agreement has no finalized decision'}, {status: 409});
     if (!agreement.vault || /^0x0+$/.test(String(agreement.vault))) return NextResponse.json({error: 'Agreement has no bound Vault'}, {status: 409});
     const vault = await genlayer.readContract({address: getAddress(String(agreement.vault)), functionName: 'get_vault', args: []}) as any;
     if (getAddress(String(vault.agreement)) !== agreementAddress) return NextResponse.json({error: 'Vault does not point to Agreement'}, {status: 409});

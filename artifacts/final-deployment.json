@@ -1,50 +1,40 @@
 {
   "status": "NOT_READY",
-  "sourceCommit": "32cbe3c",
-  "reason": "Hardened contracts are freshly deployed; a fresh two-party lifecycle and production attestor configuration are still required.",
+  "sourceCommit": "pending-final-freeze",
   "network": "Studionet",
   "chainId": 61999,
   "signer": "0xf883bce8fcb120f714b147446342d7e4545bc988",
   "attestor": "0xf883bce8fcb120f714b147446342d7e4545bc988",
   "contracts": {
-    "agreement": {
-      "address": "0x079A40FAA137aC26d7Bad4449E0b7191991dB6e0",
-      "deploymentTx": "0x1e388e0d3b940be6e7cbfa4586e5382e232ff4f747912924e05e147f45aa5122",
-      "sourceSha256": "c6b492d974139a7c6f21344e0ac7684bf9ae24e0bd9a7c702f386a8ca5b904f2",
-      "execution": "SUCCESS"
-    },
-    "vault": {
-      "address": "0xe4Ed1768cbdb4382831bc4B221F668E7c8E76E3d",
-      "deploymentTx": "0x6ff3c7ec5b26af5d9dd71ffe13ab7e62640ca476ebae638bd67601ec0a8e0bf6",
-      "sourceSha256": "65485db385bd0196753d78d1276ac5e7bc1061e4b6b5f19a2eec3de04a2aea02",
-      "execution": "SUCCESS"
-    },
-    "baseEscrow": {
-      "address": "0x9d0baedb946036a99616c8abecc14f122e21e897",
-      "deploymentTx": "0x637020f5f07a93b0d852120aff88fbae0b057ab06b7c42c38557e014f616a5f1",
-      "sourceSha256": "3252628821194f7570c0d6cd93081ecbf3d277073bf1f330125e041f568951bf",
-      "chainId": 84532
-    }
+    "agreement": {"address":"0xAC7aFF325B149D9f7a979473920646FB32565C76","deploymentTx":"0xbb763321247517c0e3548b167be1f05d67ae44acb8f3ff4b4e43eb7e975f7287","sourceSha256":"f09c3801b96a59245f4260b736673884aa65b9452959afa0228173915a9ad87d","execution":"SUCCESS"},
+    "vault": {"address":"0x7147b20d7814c4E3a3170541A02412FC064c9551","deploymentTx":"0x281536ad313c6e0a5bdc9f486d007b70cd40fc1ec7763ce045f30fdde0d10198","sourceSha256":"65485db385bd0196753d78d1276ac5e7bc1061e4b6b5f19a2eec3de04a2aea02","execution":"SUCCESS"},
+    "baseEscrow": {"address":"0x9d0baedb946036a99616c8abecc14f122e21e897","deploymentTx":"0x637020f5f07a93b0d852120aff88fbae0b057ab06b7c42c38557e014f616a5f1","sourceSha256":"3252628821194f7570c0d6cd93081ecbf3d277073bf1f330125e041f568951bf","chainId":84532}
   },
-  "binding": {
-    "tx": "0x0308e83f559aa4541f74d263bcc90414b2fc38bc65cdeb806dc0e4bea0c6a30e",
-    "execution": "SUCCESS"
+  "bindingTx":"0xc7698d860cd3c909ef9b1f2b25fde0b9226a925b8e389814d264072fbc48da59",
+  "lifecycle": {
+    "owner":"0xf883bce8fcb120f714b147446342d7e4545bc988",
+    "renter":"0x7eb2a4b4e913df62eae807ef60509b3b7284c7fa",
+    "baselineTx":"0x41c82952f89bc79f3c97fa6a7817fc8ea148d683333ecaf8826677a00120c3e0",
+    "definitionHash":"0xcc3154bfcf39d54f8d89a23a48cf06cb0b27bc870aaa962dd917e32442bc56d1",
+    "baseRegistrationTx":"0x391ee7351eedf4ba73f3f8df0284178fc20b0018f95054b5e6d19163657fae65",
+    "baseFundingTx":"0x3f1baf3c6507f3d510c14e842879a179a5b847161433befdccbe06c7cd89a48c",
+    "fundingAcknowledgementTx":"0x4a44484a800a450627022e187e13a2d042f3b68837dd894ac5d59cca2be1705f",
+    "returnSubmissionTx":"0xdf16fc93376dc349d8404f67b9b7a40e32a19c0adb98f573717639d06d81a1e1",
+    "inspectionTx":"0x8e85ea65dd5e9e54dbaf7f7f3c31e2ba1d4776780fb445338a8654111e8169b7",
+    "verdict":"MINOR_DAMAGE",
+    "semanticFields":{"new_damage_present":"YES","same_item":"YES","same_item_confidence":"HIGH","damage_level":"MINOR"},
+    "settlementTx":"0xef32b60074702b7816c3c7aa98ce88ff65fdb415f6d34866700b8268a77e0f77",
+    "payoutAllocationTx":"0xaf3bd2523346e6349d5c78da1d3f9e1c84ea15e71ce2274c1a514d320697fe76",
+    "ownerClaimTx":"0x743271a13864ad08214d0d581cfc0dde5835b3d269367a4e54c72aae75e12c71",
+    "renterClaimTx":"0xf435c24381f0ee3007e868772933734a177dc3da785a1e4721c0cbfb5abb2d23",
+    "ownerAmount":150000000000000,
+    "renterAmount":850000000000000,
+    "baseReadback":{"deposited":1000000000000000,"allocated":1000000000000000,"payoutSet":true,"ownerClaimable":0,"renterClaimable":0},
+    "acknowledgementRetries":{"owner":["0x1542b667912d6fbecf3acd6fa18fd099ceb5257fcc6c4ab997fb414e7f1563be","0x72ee786f4ff6b2403dbccf0b45b349a99a729d7db1468a8ed930b938fc9d81eb"],"renter":["0xbe058531a078a630e2709700004a4f2c47f22c08b94c978fa9a6d73acfb2a3bb","0xd2ec6ad8f1d68a6f780e8290b3dc0581e63d630acf553bd002b42d945758493e"]},
+    "acknowledgementResult":"NO_MAJORITY on both attempts; Base claims are final, GenLayer claim flags remain false"
   },
-  "security": {
-    "payoutRelayDerivesAuthoritativeState": true,
-    "baseAdministratorWithdrawalRemoved": true,
-    "vaultExternalEvidenceRequiresAttestor": true,
-    "attestorTrustAssumption": "The server attestor verifies finalized Base receipts before submitting the GenLayer acknowledgement. The cross-chain relay is not fully trustless."
-  },
-  "tests": {
-    "genlayerContract": "64 passed",
-    "baseEscrow": "3 passed",
-    "frontend": "19 passed"
-  },
-  "ready": false,
-  "remaining": [
-    "Fresh lifecycle execution against these secured addresses",
-    "Vercel production configuration with the attestor secret",
-    "Final production readback and CI run for the secured commit"
-  ]
+  "security":{"payoutRelayDerivesAuthoritativeState":true,"baseAdministratorWithdrawalRemoved":true,"vaultExternalEvidenceRequiresAttestor":true,"trustAssumption":"Server attestor independently verifies finalized Base receipts before GenLayer acknowledgement; not fully trustless."},
+  "tests":{"genlayerContract":"64 passed","baseEscrow":"3 passed","frontend":"19 passed","ci":"green at 35442228810 before final state-transition/UI cleanup"},
+  "ready":false,
+  "remaining":["GenLayer Studionet claim acknowledgements currently finalize NO_MAJORITY and need a healthy consensus window or validator recovery","Vercel production attestor secret is not configured","Final Vercel deployment and public route verification after this final cleanup"]
 }

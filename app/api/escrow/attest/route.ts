@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     if (receipt.status !== 'success' || getAddress(String(transaction.to)) !== getAddress(escrow)) return NextResponse.json({error: 'Base transaction is not a finalized success on the canonical escrow'}, {status: 409});
     const id = pad(getAddress(body.agreement) as `0x${string}`, {size: 32});
     const decoded = decodeFunctionData({abi: escrowAbi, data: transaction.input});
-    if (decoded.args?.[0] !== id) return NextResponse.json({error: 'Base transaction targets a different Agreement'}, {status: 409});
+    if (String(decoded.args?.[0]).toLowerCase() !== id.toLowerCase()) return NextResponse.json({error: 'Base transaction targets a different Agreement'}, {status: 409});
     const genlayer = createClient({chain: studionet});
     const agreement = await genlayer.readContract({address: getAddress(body.agreement), functionName: 'get_agreement', args: []}) as any;
     const vaultAddress = getAddress(String(agreement.vault));
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     }
     if (decoded.functionName !== 'claim') return NextResponse.json({error: 'Claim attestation requires a claim transaction'}, {status: 409});
     const logs = parseEventLogs({abi: escrowAbi, logs: receipt.logs, eventName: 'Claimed'});
-    const claimed = logs.find(log => getAddress(String(log.args.recipient)) === getAddress(String(body.kind === 'owner_claim' ? agreement.owner : agreement.renter)) && log.args.agreementId === id);
+    const claimed = logs.find(log => getAddress(String(log.args.recipient)) === getAddress(String(body.kind === 'owner_claim' ? agreement.owner : agreement.renter)) && String(log.args.agreementId).toLowerCase() === id.toLowerCase());
     if (!claimed) return NextResponse.json({error: 'No matching finalized payout event found'}, {status: 409});
     const expected = BigInt(body.kind === 'owner_claim' ? vault.owner_claim : vault.renter_claim);
     if (BigInt(claimed.args.amount) !== expected || getAddress(String(transaction.from)) !== getAddress(String(body.kind === 'owner_claim' ? agreement.owner : agreement.renter))) return NextResponse.json({error: 'Claim amount or recipient does not match authoritative Vault state'}, {status: 409});

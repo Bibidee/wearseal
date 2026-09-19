@@ -3,13 +3,13 @@ import {studionet} from 'genlayer-js/chains';
 
 const rpcUrl = studionet.rpcUrls.default.http[0];
 const addresses = {
-  agreement: '0x079A40FAA137aC26d7Bad4449E0b7191991dB6e0',
-  vault: '0xe4Ed1768cbdb4382831bc4B221F668E7c8E76E3d',
+  agreement: '0xAC7aFF325B149D9f7a979473920646FB32565C76',
+  vault: '0x7147b20d7814c4E3a3170541A02412FC064c9551',
 };
 const transactions = {
-  agreement: '0x117ebd3ad90406410f442f1739c90ec9953dbcb8b9dc2d54e9e149bac5e26f70',
-  vault: '0xb0b699e2cf8d2d14f8208b1228ec7da1a2c303bba94f309e01481b5f8e1b7b5d',
-  binding: '0xe5750dfb0c0745b209aa38fecd7d9422c7dd4726c2fb12a4c9cb83ccbed40f6f',
+  agreement: '0xbb763321247517c0e3548b167be1f05d67ae44acb8f3ff4b4e43eb7e975f7287',
+  vault: '0x281536ad313c6e0a5bdc9f486d007b70cd40fc1ec7763ce045f30fdde0d10198',
+  binding: '0xc7698d860cd3c909ef9b1f2b25fde0b9226a925b8e389814d264072fbc48da59',
 };
 const client = createClient({chain: studionet});
 const json = value => JSON.parse(JSON.stringify(value, (_, item) => typeof item === 'bigint' ? item.toString() : item));
