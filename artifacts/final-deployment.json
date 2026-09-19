@@ -97,7 +97,7 @@
       "repeatOwnerAcknowledgement": {"result": "REJECTED", "tx": "0xe89230feafeb0e11366c747fbfa8f881f8943fc32db2b52934c312f7d4a0c9ee", "reason": "owner_claimed already true"},
     "repeatRenterClaim": {"result": "REJECTED", "method": "Base Sepolia eth_call simulation", "reason": "nothing claimable", "revertedAttempt": "0x50df775b7d43dfeb5f5aede847669da1610384cd79b0df35bed6f76605de7b8c"}
   },
-  "production": {"url": "https://wearseal.vercel.app", "commit": "28e0abe"},
+  "production": {"url": "https://wearseal.vercel.app", "commit": "3b5f952"},
   "ready": false,
   "remaining": "Baseline transaction hash was not captured in the browser session. The later duplicate renter attempt 0x50df775b7d43dfeb5f5aede847669da1610384cd79b0df35bed6f76605de7b8c reverted and must never be shown as success; the transaction-state fix is ready for deployment."
 }
