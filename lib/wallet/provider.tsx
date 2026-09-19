@@ -8,11 +8,16 @@ import {BASE_CHAIN_ID} from '../base-escrow';
 
 export type Provider = {request(a: {method: string; params?: unknown[]}): Promise<unknown>; on?(e: string, f: (...a: any[]) => void): void; removeListener?(e: string, f: (...a: any[]) => void): void};
 
+const isUnknownChain = (error: unknown) => {
+  const value = error as {code?: number; message?: string; data?: {originalError?: {code?: number; message?: string}}} | undefined;
+  return value?.code === 4902 || value?.data?.originalError?.code === 4902 || /unrecognized chain id|unknown chain/i.test(`${value?.message || ''} ${value?.data?.originalError?.message || ''}`);
+};
+
 export async function ensureStudionet(provider: Provider) {
   try {
     await provider.request({method: 'wallet_switchEthereumChain', params: [{chainId: `0x${STUDIONET.id.toString(16)}`}]});
   } catch (error) {
-    if ((error as {code?: number}).code !== 4902) throw error;
+    if (!isUnknownChain(error)) throw error;
     await provider.request({method: 'wallet_addEthereumChain', params: [{chainId: `0x${STUDIONET.id.toString(16)}`, chainName: STUDIONET.name, nativeCurrency: {name: 'GEN', symbol: 'GEN', decimals: 18}, rpcUrls: [STUDIONET.rpcUrl], blockExplorerUrls: [STUDIONET.explorer]}]});
     await provider.request({method: 'wallet_switchEthereumChain', params: [{chainId: `0x${STUDIONET.id.toString(16)}`}]});
   }
@@ -68,7 +73,7 @@ export function WalletProvider({children}: {children: React.ReactNode}) {
     if (!provider) throw Error('No injected wallet found');
     try { await provider.request({method: 'wallet_switchEthereumChain', params: [{chainId: `0x${BASE_CHAIN_ID.toString(16)}`}]}); }
     catch (error) {
-      if ((error as {code?: number}).code !== 4902) throw error;
+      if (!isUnknownChain(error)) throw error;
       await provider.request({method: 'wallet_addEthereumChain', params: [{chainId: `0x${BASE_CHAIN_ID.toString(16)}`, chainName: 'Base Sepolia', nativeCurrency: {name: 'Ether', symbol: 'ETH', decimals: 18}, rpcUrls: ['https://sepolia.base.org'], blockExplorerUrls: ['https://sepolia.basescan.org']}]});
       await provider.request({method: 'wallet_switchEthereumChain', params: [{chainId: `0x${BASE_CHAIN_ID.toString(16)}`}]});
     }
