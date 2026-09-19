@@ -1,3 +1,5 @@
 # Security
 
-URLs require HTTPS and bounded lengths. Evidence is hostile data and prompts prohibit following embedded instructions. Policy is immutable after renter acceptance. Owner payouts are derived from stored Agreement state, never caller input. Vault settlement is exact-once and computes the renter remainder after integer division.
+URLs require HTTPS and bounded lengths. Evidence is hostile data and prompts prohibit following embedded instructions. Owner and renter zero addresses are rejected, return submission is deadline-bound, and expiry cannot overwrite a decided or settled agreement. Policy is immutable after renter acceptance. Owner payouts are derived from stored Agreement state, never caller input. Settlement uses an explicit verdict-to-basis-points mapping and exact-once state guards; the renter remainder is computed after integer division.
+
+Known protocol limitation: `emit_transfer(..., on="finalized")` creates an asynchronous child transaction. The current public contract API exposes no in-contract child-success acknowledgement or automatic rollback primitive, so claim flags cannot be made failure-safe solely inside this contract pair. The live lifecycle must therefore record child transfer receipts and the release is not marked READY until this limitation is resolved or an approved recovery design is implemented.

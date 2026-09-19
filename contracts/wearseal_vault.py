@@ -21,7 +21,8 @@ class WearsealVault(gl.Contract):
     renter_claim:u256
     owner_claimed:bool
     renter_claimed:bool
-    def __init__(self,agreement_contract): self.agreement_contract=Address(str(agreement_contract));self.credited=u256(0);self.settled=False;self.owner_claim=u256(0);self.renter_claim=u256(0);self.owner_claimed=False;self.renter_claimed=False
+    def __init__(self,agreement_contract):
+        address=agreement_contract if not isinstance(agreement_contract, (bytes, bytearray, str)) else Address(agreement_contract);assert str(address).lower()!="0x0000000000000000000000000000000000000000";self.agreement_contract=address;self.credited=u256(0);self.settled=False;self.owner_claim=u256(0);self.renter_claim=u256(0);self.owner_claimed=False;self.renter_claimed=False
     @gl.public.write.payable
     def deposit(self):
         assert self.credited==0 and gl.message.value>0
@@ -31,11 +32,11 @@ class WearsealVault(gl.Contract):
     def sync_funding(self):
         a=Agreement(self.agreement_contract).view().get_agreement();assert self.credited>0 and not self.settled and a["status"]=="BASELINE_ACCEPTED";Agreement(self.agreement_contract).emit(on="finalized").mark_funded()
     @gl.public.view
-    def get_vault(self): return {"agreement":self.agreement_contract,"credited":self.credited,"settled":self.settled,"owner_claim":self.owner_claim,"renter_claim":self.renter_claim,"owner_claimed":self.owner_claimed,"renter_claimed":self.renter_claimed}
+    def get_vault(self) -> dict: return {"agreement":self.agreement_contract,"credited":self.credited,"settled":self.settled,"owner_claim":self.owner_claim,"renter_claim":self.renter_claim,"owner_claimed":self.owner_claimed,"renter_claimed":self.renter_claimed}
     @gl.public.write
     def settle(self):
         assert self.credited>0 and not self.settled
-        a=Agreement(self.agreement_contract).view().settlement_instruction();assert a["terminal"]
+        a=Agreement(self.agreement_contract).view().settlement_instruction();assert a["terminal"] and 0<=a["owner_bps"]<=10000
         self.settled=True;owner_amount=self.credited*a["owner_bps"]//10000;renter_amount=self.credited-owner_amount;self.owner_claim=owner_amount;self.renter_claim=renter_amount;self.credited=u256(0);Agreement(self.agreement_contract).emit(on="finalized").mark_settled()
     @gl.public.write
     def sync_settlement(self):
@@ -51,5 +52,5 @@ class WearsealVault(gl.Contract):
     @gl.public.write
     def refund_cancelled(self):
         assert self.credited>0 and not self.settled
-        a=Agreement(self.agreement_contract).view().get_agreement();assert a["status"]=="CANCELLED"
+        a=Agreement(self.agreement_contract).view().get_agreement();assert gl.message.sender_address==a["renter"] and a["status"]=="CANCELLED"
         amount=self.credited;self.settled=True;self.credited=u256(0);self.renter_claim=amount
