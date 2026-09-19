@@ -45,7 +45,8 @@ const checkoutUrl = process.env.WEARSEAL_CHECKOUT_URL || 'https://raw.githubuser
 const checkoutHash = process.env.WEARSEAL_CHECKOUT_HASH || '0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb';
 const deadline = BigInt(process.env.WEARSEAL_DEADLINE || Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60);
 const agreement = await deploy('contracts/wearseal_agreement.py', [account.address, renter, 'WearSeal demo camera', 'fixture-serial-hash', 'Normal wear is acceptable; scratches are minor; cracks or missing parts are material.', checkoutUrl, checkoutHash, 1000000000000000n, 1500, 10000, deadline], 'agreement');
-const vault = await deploy('contracts/wearseal_vault.py', [agreement], 'vault');
+const attestor = process.env.WEARSEAL_ATTESTOR_ADDRESS || account.address;
+const vault = await deploy('contracts/wearseal_vault.py', [agreement, attestor], 'vault');
 const bindTx = await client.writeContract({ address: agreement, functionName: 'bind_vault', args: [vault] });
 await finalized(bindTx, 'bind_vault');
 evidence.binding = { tx: bindTx, execution: 'SUCCESS' };

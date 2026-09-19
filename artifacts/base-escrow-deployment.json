@@ -3,8 +3,8 @@
   "chainId": 84532,
   "deployer": "0x4A7D76b8C4668a3426d6d54eC24b41Fa87b532f5",
   "relayer": "0x4A7D76b8C4668a3426d6d54eC24b41Fa87b532f5",
-  "address": "0x562f1fc218beccb9e525d148618526a03ae7aa9e",
-  "deploymentTx": "0xb945b36f619323af7529f931edc73e18f114659124bfb54df8b735af434058fc",
-  "sourceSha256": "5f09eed59afed26c542bf4211dfad63b11221c3bfe30949107c3f8faaf54c67d",
+  "address": "0x9d0baedb946036a99616c8abecc14f122e21e897",
+  "deploymentTx": "0x637020f5f07a93b0d852120aff88fbae0b057ab06b7c42c38557e014f616a5f1",
+  "sourceSha256": "3252628821194f7570c0d6cd93081ecbf3d277073bf1f330125e041f568951bf",
   "rpcUrl": "https://sepolia.base.org"
 }

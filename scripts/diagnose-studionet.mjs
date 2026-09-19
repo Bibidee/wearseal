@@ -3,8 +3,8 @@ import {studionet} from 'genlayer-js/chains';
 
 const rpcUrl = studionet.rpcUrls.default.http[0];
 const addresses = {
-  agreement: '0x06569280c7B478E6c4e9501CD29b4Fa25b0DF067',
-  vault: '0xE1B4398af7274aa9492Dc5878Eb406DbEc68a39c',
+  agreement: '0x079A40FAA137aC26d7Bad4449E0b7191991dB6e0',
+  vault: '0xe4Ed1768cbdb4382831bc4B221F668E7c8E76E3d',
 };
 const transactions = {
   agreement: '0x117ebd3ad90406410f442f1739c90ec9953dbcb8b9dc2d54e9e149bac5e26f70',

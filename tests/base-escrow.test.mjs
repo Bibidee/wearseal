@@ -33,6 +33,9 @@ async function tx(client, request) {
   const hash = await client.writeContract(request);
   return publicClient.waitForTransactionReceipt({hash});
 }
+async function register(escrow, id, renterAddress, amount) {
+  await tx(relayerClient, {address: escrow, abi, functionName: 'registerAgreement', args: [id, renterAddress, amount]});
+}
 
 async function deployRejector() {
   const source = 'interface IE { function claim(bytes32 id) external; } contract Rejector { function claim(address e, bytes32 id) external { IE(e).claim(id); } receive() external payable { revert(); } }';
@@ -47,6 +50,7 @@ test('WearSealEscrow allocation, pull claims, authorization and replay guards', 
   const deposit = parseEther('1');
   const ownerAmount = parseEther('0.15');
   const renterAmount = parseEther('0.85');
+  await register(escrow, agreement, renter.address, deposit);
   await tx(renterClient, {address: escrow, abi, functionName: 'fund', args: [agreement], value: deposit});
   assert.deepEqual(await publicClient.readContract({address: escrow, abi, functionName: 'getPool', args: [agreement]}), [deposit, 0n, false]);
   await assert.rejects(() => tx(ownerClient, {address: escrow, abi, functionName: 'setPayout', args: [agreement, owner.address, ownerAmount, renter.address, renterAmount]}));
@@ -63,15 +67,15 @@ test('WearSealEscrow allocation, pull claims, authorization and replay guards', 
   await assert.rejects(() => tx(renterClient, {address: escrow, abi, functionName: 'claim', args: [agreement]}));
 });
 
-test('WearSealEscrow rejects zero relayer and preserves unallocated withdrawal rules', async () => {
+test('WearSealEscrow rejects zero relayer and administrator withdrawal', async () => {
   await assert.rejects(() => ownerClient.deployContract({abi, bytecode: compiled.bytecode, args: ['0x0000000000000000000000000000000000000000']}));
   const escrow = await deploy();
   const id = pad('0x' + 'bb'.repeat(20), {size: 32});
   const amount = parseEther('0.5');
+  await register(escrow, id, renter.address, amount);
   await tx(renterClient, {address: escrow, abi, functionName: 'fund', args: [id], value: amount});
-  await assert.rejects(() => tx(ownerClient, {address: escrow, abi, functionName: 'withdrawUnallocated', args: [id, renter.address, amount + 1n]}));
-  await tx(ownerClient, {address: escrow, abi, functionName: 'withdrawUnallocated', args: [id, renter.address, amount]});
-  assert.deepEqual(await publicClient.readContract({address: escrow, abi, functionName: 'getPool', args: [id]}), [0n, 0n, false]);
+  assert.equal(abi.some(item => item.name === 'withdrawUnallocated'), false);
+  assert.deepEqual(await publicClient.readContract({address: escrow, abi, functionName: 'getPool', args: [id]}), [amount, 0n, false]);
 });
 
 test('a failed recipient transfer preserves the claim for retry', async () => {
@@ -79,6 +83,7 @@ test('a failed recipient transfer preserves the claim for retry', async () => {
   const rejector = await deployRejector();
   const id = pad('0x' + 'cc'.repeat(20), {size: 32});
   const amount = parseEther('0.25');
+  await register(escrow, id, renter.address, amount);
   await tx(renterClient, {address: escrow, abi, functionName: 'fund', args: [id], value: amount});
   await tx(relayerClient, {address: escrow, abi, functionName: 'setPayout', args: [id, rejector, amount, renter.address, 0n]});
   await assert.rejects(() => tx(ownerClient, {address: rejector, abi: [{type: 'function', name: 'claim', stateMutability: 'nonpayable', inputs: [{name: 'e', type: 'address'}, {name: 'id', type: 'bytes32'}], outputs: []}], functionName: 'claim', args: [escrow, id]}));

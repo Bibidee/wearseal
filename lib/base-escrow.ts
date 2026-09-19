@@ -2,7 +2,7 @@ import {baseSepolia} from 'viem/chains';
 import {createPublicClient, encodeFunctionData, http, pad, type Hex} from 'viem';
 
 export const BASE_CHAIN_ID = 84532;
-export const BASE_ESCROW_ADDRESS = (process.env.NEXT_PUBLIC_BASE_ESCROW_ADDRESS || '0x562f1fc218beccb9e525d148618526a03ae7aa9e') as `0x${string}`;
+export const BASE_ESCROW_ADDRESS = (process.env.NEXT_PUBLIC_BASE_ESCROW_ADDRESS || '0x9d0baedb946036a99616c8abecc14f122e21e897') as `0x${string}`;
 export const basePublicClient = createPublicClient({chain: baseSepolia, transport: http(process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org')});
 export const escrowAbi = [
   {type: 'function', name: 'fund', stateMutability: 'payable', inputs: [{name: 'agreementId', type: 'bytes32'}], outputs: []},

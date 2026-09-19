@@ -63,11 +63,17 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
       if (action === 'fund') {
         if (!wallet.switchBaseSepolia) throw Error('Base Sepolia wallet switching is unavailable.');
         await wallet.switchBaseSepolia();
+        const registration = await fetch('/api/escrow/register', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({agreement: agreementAddress})});
+        if (!registration.ok) throw Error((await registration.json()).error || 'Base escrow registration failed.');
         const baseHash = await sendBase(wallet.provider, wallet.account, fundData(agreementAddress), `0x${BigInt(agreement.deposit).toString(16).padStart(64, '0')}`);
         await waitBaseReceipt(wallet.provider, baseHash);
         setBaseTx(baseHash);
         await wallet.switchStudionet?.();
-        await submitAndConfirm(wallet.client, {address: vaultAddress, functionName: 'deposit', args: [BigInt(agreement.deposit), baseHash]}, () => expected(before), setTx);
+        const attestation = await fetch('/api/escrow/attest', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({agreement: agreementAddress, kind: 'funding', tx: baseHash})});
+        if (!attestation.ok) throw Error((await attestation.json()).error || 'Funding verification failed.');
+        const attested = await attestation.json() as {hash: string};
+        setTx({phase: 'FINALIZED_SUCCESS', hash: attested.hash});
+        for (let i = 0; i < 24 && !(await expected(before)); i++) await wait(5000);
         return;
       }
       if (!wallet.onStudionet) throw Error('Switch wallet to Studionet 61999.');
@@ -86,7 +92,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
         if (!wallet.onStudionet) throw Error('Switch wallet to Studionet 61999.');
         await submitAndConfirm(wallet.client, {address: vaultAddress, functionName: 'settle', args: []}, async () => { for (let i = 0; i < 24; i++) { const {a, v} = await read(); if (String(a?.status).toUpperCase() === 'SETTLED' && v?.settled && BigInt(v?.credited ?? 0) === 0n) return true; await wait(5000); } return false; }, setTx);
         const settled = await readVault(requireAddress(vaultAddress, 'Vault'));
-        const response = await fetch('/api/escrow/relay', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({agreement: agreementAddress, owner: agreement.owner, ownerAmount: String(settled.owner_claim), renter: agreement.renter, renterAmount: String(settled.renter_claim)})});
+        const response = await fetch('/api/escrow/relay', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({agreement: agreementAddress})});
         if (!response.ok) throw Error((await response.json()).error || 'Base Sepolia payout allocation failed.');
         await read(); return;
       }
@@ -96,8 +102,11 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
       await wallet.switchBaseSepolia();
       const hash = await sendBase(wallet.provider, wallet.account, claimData(agreementAddress)); await waitBaseReceipt(wallet.provider, hash); setBaseTx(hash);
       await wallet.switchStudionet?.();
-      const ack = functionName === 'claim_owner' ? 'ack_owner_claim' : 'ack_renter_claim';
-      await submitAndConfirm(wallet.client, {address: vaultAddress, functionName: ack, args: [hash]}, async () => { for (let i = 0; i < 24; i++) { const {v} = await read(); if ((functionName === 'claim_owner' && v?.owner_claimed) || (functionName === 'claim_renter' && v?.renter_claimed)) return true; await wait(5000); } return false; }, setTx);
+      const kind = functionName === 'claim_owner' ? 'owner_claim' : 'renter_claim';
+      const attestation = await fetch('/api/escrow/attest', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({agreement: agreementAddress, kind, tx: hash})});
+      if (!attestation.ok) throw Error((await attestation.json()).error || 'Claim verification failed.');
+      const attested = await attestation.json() as {hash: string};
+      setTx({phase: 'FINALIZED_SUCCESS', hash: attested.hash});
     } catch (e) { setError(describeError(e)); }
   };
   const expire = async () => { const before = agreement; await submitAndConfirm(wallet.client, {address: agreementAddress, functionName: 'expire', args: []}, async () => { for (let i = 0; i < 12; i++) { const {a} = await read(); if (a?.status === 'CANCELLED' || a?.status === 'DECIDED') return a?.status !== before?.status; await wait(5000); } return false; }, setTx); };
@@ -110,7 +119,7 @@ export default function LiveRoute({id, action}: {id: string; action: Action}) {
   return <main className="wrap"><SiteNav/><div className="page-shell">
     <div className="passport-top"><div><div className="kicker">WEARSEAL CONDITION PASSPORT</div><h1 className="page-title">{agreement?.item_label || 'Live Agreement'}</h1><p className="subhead">A hash-bound equipment record for a two-party rental. The state below is read directly from Agreement {short(agreementAddress)}.</p><span className={`status-pill ${['SETTLED', 'BASELINE_ACCEPTED', 'FUNDED', 'DECIDED'].includes(status) ? 'good' : ''}`}>{status}</span></div><div className="seal">{status === 'SETTLED' ? 'AGREEMENT CLOSED' : status === 'DECIDED' ? 'CONDITION SEALED' : 'BASELINE RECORD'}</div></div>
     {agreement && <>
-      <div className="passport-meta"><div className="meta-cell"><label>AGREEMENT</label><strong className="mono">{short(agreementAddress)}</strong></div><div className="meta-cell"><label>DEPOSIT</label><strong>{String(agreement.deposit)} GEN</strong></div><div className="meta-cell"><label>DEADLINE</label><strong>{new Date(Number(agreement.deadline) * 1000).toLocaleDateString()}</strong></div><div className="meta-cell"><label>VAULT</label><strong className="mono">{short(vaultAddress)}</strong></div></div>
+      <div className="passport-meta"><div className="meta-cell"><label>AGREEMENT</label><strong className="mono">{short(agreementAddress)}</strong></div><div className="meta-cell"><label>BASE SEPOLIA DEPOSIT</label><strong>{String(agreement.deposit)} wei ETH</strong></div><div className="meta-cell"><label>DEADLINE</label><strong>{new Date(Number(agreement.deadline) * 1000).toLocaleDateString()}</strong></div><div className="meta-cell"><label>VAULT</label><strong className="mono">{short(vaultAddress)}</strong></div></div>
       <div className="lifecycle">{stages.map((stage, i) => <div className={`stage ${stageState(stage)}`} key={stage}><b>0{i + 1}</b><br/>{stage}</div>)}</div>
       <section className="passport-section"><h3>01 / PEOPLE & POLICY</h3><div className="proof-grid"><div className="proof-item"><label>OWNER</label><div className="person"><Identicon address={agreement.owner}/><code>{short(agreement.owner)}</code></div></div><div className="proof-item"><label>RENTER</label><div className="person"><Identicon address={agreement.renter}/><code>{short(agreement.renter)}</code></div></div><div className="proof-item"><label>POLICY</label><code>{agreement.minor_bps} bps minor / {agreement.material_bps} bps material</code></div></div></section>
       <section className="passport-section"><h3>02 / EVIDENCE INTEGRITY</h3><div className="evidence-grid"><EvidenceCard kind="CHECKOUT" url={agreement.checkout_url} hash={agreement.checkout_hash}/>{agreement.return_url ? <EvidenceCard kind="RETURN" url={agreement.return_url} hash={agreement.return_hash}/> : <div className="proof-item"><div className="eyebrow">RETURN EVIDENCE</div><p className="subhead">Waiting for the renter to submit a verified return image.</p></div>}</div></section>
