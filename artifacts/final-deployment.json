@@ -30,11 +30,13 @@
     "ownerAmount":150000000000000,
     "renterAmount":850000000000000,
     "baseReadback":{"deposited":1000000000000000,"allocated":1000000000000000,"payoutSet":true,"ownerClaimable":0,"renterClaimable":0},
-    "acknowledgementRetries":{"owner":["0x1542b667912d6fbecf3acd6fa18fd099ceb5257fcc6c4ab997fb414e7f1563be","0x72ee786f4ff6b2403dbccf0b45b349a99a729d7db1468a8ed930b938fc9d81eb"],"renter":["0xbe058531a078a630e2709700004a4f2c47f22c08b94c978fa9a6d73acfb2a3bb","0xd2ec6ad8f1d68a6f780e8290b3dc0581e63d630acf553bd002b42d945758493e"]},
-    "acknowledgementResult":"NO_MAJORITY on both attempts; Base claims are final, GenLayer claim flags remain false"
+    "ownerAcknowledgementTx":"0xacd47a088dcac8b389c94fb513731dd984c3f8ce567cae4e7453969d59d50454",
+    "renterAcknowledgementTx":"0x759e78a6a0b77d9ca80b611383b6d8d2b2ccef52d748b0007a6a5d63bf11107a",
+    "acknowledgementResult":"Leader-only attestor recovery finalized MAJORITY_AGREE; both GenLayer claim flags are true",
+    "recoveryAttempts":{"owner":["0x1542b667912d6fbecf3acd6fa18fd099ceb5257fcc6c4ab997fb414e7f1563be","0x72ee786f4ff6b2403dbccf0b45b349a99a729d7db1468a8ed930b938fc9d81eb","0xacd47a088dcac8b389c94fb513731dd984c3f8ce567cae4e7453969d59d50454"],"renter":["0xbe058531a078a630e2709700004a4f2c47f22c08b94c978fa9a6d73acfb2a3bb","0xd2ec6ad8f1d68a6f780e8290b3dc0581e63d630acf553bd002b42d945758493e","0x759e78a6a0b77d9ca80b611383b6d8d2b2ccef52d748b0007a6a5d63bf11107a"]}
   },
   "security":{"payoutRelayDerivesAuthoritativeState":true,"baseAdministratorWithdrawalRemoved":true,"vaultExternalEvidenceRequiresAttestor":true,"trustAssumption":"Server attestor independently verifies finalized Base receipts before GenLayer acknowledgement; not fully trustless."},
   "tests":{"genlayerContract":"64 passed","baseEscrow":"3 passed","frontend":"19 passed","ci":"green at 35442228810 before final state-transition/UI cleanup"},
   "ready":false,
-  "remaining":["GenLayer Studionet claim acknowledgements currently finalize NO_MAJORITY and need a healthy consensus window or validator recovery","Vercel production attestor secret is not configured","Final Vercel deployment and public route verification after this final cleanup"]
+  "remaining":["Vercel production attestor secret is not configured","Final Vercel deployment and public route verification after this final cleanup"]
 }
