@@ -40,7 +40,7 @@
       "ownerAllocation": "0x8061dfbf66ed1f92b5182109331b05ce5062e34a9da23c86e84810f28cae6917",
       "ownerClaim": "0xf2a601572f1a0d5bf0aeada940f68a6ae964fc4f046e7a663d555901a7bc93e5",
       "ownerAcknowledgement": "0x6165e738d3019e6cf3262dfd8b42ce43d4c4329ff91f053ba7e9205d46d3954d",
-      "renterClaim": "0x50df775b7d43dfeb5f5aede847669da1610384cd79b0df35bed6f76605de7b8c",
+      "renterClaim": "0xbae920d5ef95cf0d1b24ad520188dad1712864a7f9cbdff0aa03bff376d88b19",
       "renterAcknowledgement": "0xc5a9515f6ebdcf0d1a160dac32a690de2b60cb376d7a0117ffe352fc36a9cf01"
     },
     "inspection": {
@@ -95,7 +95,7 @@
   "replay": {
     "repeatSettlement": {"result": "REJECTED", "tx": "0x7934c5d64131e1423e68802ff60eadafad11be90588468943847e6615d9fff82", "reason": "credited == 0 or already settled"},
       "repeatOwnerAcknowledgement": {"result": "REJECTED", "tx": "0xe89230feafeb0e11366c747fbfa8f881f8943fc32db2b52934c312f7d4a0c9ee", "reason": "owner_claimed already true"},
-    "repeatRenterClaim": {"result": "REJECTED", "method": "Base Sepolia eth_call simulation", "reason": "nothing claimable"}
+    "repeatRenterClaim": {"result": "REJECTED", "method": "Base Sepolia eth_call simulation", "reason": "nothing claimable", "revertedAttempt": "0x50df775b7d43dfeb5f5aede847669da1610384cd79b0df35bed6f76605de7b8c"}
   },
   "production": {"url": "https://wearseal.vercel.app", "commit": "28e0abe"},
   "ready": false,
