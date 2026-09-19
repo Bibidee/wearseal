@@ -1,28 +1,9 @@
 {
   "network": "Studionet",
   "chainId": 61999,
-  "source": {
-    "commit": "29bb31e",
-    "agreementSha256": "c6b492d974139a7c6f21344e0ac7684bf9ae24e0bd9a7c702f386a8ca5b904f2",
-    "vaultSha256": "238ac2437de32ada7f88ba7bc25048b0d8e886d4032bd39f6bbdad1f8da50748"
-  },
-  "addresses": {
-    "agreement": "0x06569280c7B478E6c4e9501CD29b4Fa25b0DF067",
-    "vault": "0xE1B4398af7274aa9492Dc5878Eb406DbEc68a39c"
-  },
-  "deployment": {
-    "agreementTx": "0x117ebd3ad90406410f442f1739c90ec9953dbcb8b9dc2d54e9e149bac5e26f70",
-    "vaultTx": "0xb0b699e2cf8d2d14f8208b1228ec7da1a2c303bba94f309e01481b5f8e1b7b5d",
-    "bindingTx": "0xe5750dfb0c0745b209aa38fecd7d9422c7dd4726c2fb12a4c9cb83ccbed40f6f"
-  },
-  "baseEscrow": {
-    "network": "Base Sepolia",
-    "chainId": 84532,
-    "address": "0x562f1fc218beccb9e525d148618526a03ae7aa9e",
-    "deploymentTx": "0xb945b36f619323af7529f931edc73e18f114659124bfb54df8b735af434058fc",
-    "sourceSha256": "5f09eed59afed26c542bf4211dfad63b11221c3bfe30949107c3f8faaf54c67d"
-  },
-  "lifecycle": null,
-  "ready": false,
-  "remaining": "Fresh two-party lifecycle and production relayer configuration are still pending."
+  "source": { "commit": "29bb31e", "agreementSha256": "c6b492d974139a7c6f21344e0ac7684bf9ae24e0bd9a7c702f386a8ca5b904f2", "vaultSha256": "238ac2437de32ada7f88ba7bc25048b0d8e886d4032bd39f6bbdad1f8da50748" },
+  "addresses": { "agreement": "0x06569280c7B478E6c4e9501CD29b4Fa25b0DF067", "vault": "0xE1B4398af7274aa9492Dc5878Eb406DbEc68a39c" },
+  "deployment": { "agreementTx": "0x117ebd3ad90406410f442f1739c90ec9953dbcb8b9dc2d54e9e149bac5e26f70", "vaultTx": "0xb0b699e2cf8d2d14f8208b1228ec7da1a2c303bba94f309e01481b5f8e1b7b5d", "bindingTx": "0xe5750dfb0c0745b209aa38fecd7d9422c7dd4726c2fb12a4c9cb83ccbed40f6f" },
+  "baseEscrow": { "network": "Base Sepolia", "chainId": 84532, "address": "0x562f1fc218beccb9e525d148618526a03ae7aa9e", "deploymentTx": "0xb945b36f619323af7529f931edc73e18f114659124bfb54df8b735af434058fc", "sourceSha256": "5f09eed59afed26c542bf4211dfad63b11221c3bfe30949107c3f8faaf54c67d" },
+  "lifecycle": null, "ready": false, "remaining": "Fresh two-party lifecycle and production readback are still pending."
 }
