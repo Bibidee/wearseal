@@ -9,6 +9,7 @@ import {studionet} from 'genlayer-js/chains';
 const abi = parseAbi(['function setPayout(bytes32,address,uint256,address,uint256)','function getPool(bytes32) view returns (uint256,uint256,bool)','function getClaimable(bytes32,address) view returns (uint256)']);
 const agreementAbi = parseAbi(['function get_agreement() view returns (address owner,address renter,string item_label,string serial_hash,string rubric,string checkout_url,string checkout_hash,uint256 deposit,uint256 minor_bps,uint256 material_bps,uint256 deadline,string status,string definition_hash,address vault,string return_url,string return_hash,string verdict,string same_item,string reason,string same_item_confidence,string new_damage_present,string damage_level,string damage_regions,uint256 reinspection_count)','function settlement_instruction() view returns (address owner,address renter,uint256 deposit,uint256 owner_bps,uint256 renter_bps,bool terminal)']);
 const vaultAbi = parseAbi(['function get_vault() view returns (address agreement,uint256 credited,bool settled,uint256 owner_claim,uint256 renter_claim,bool owner_claimed,bool renter_claimed,string funding_tx,string owner_claim_tx,string renter_claim_tx,string payout_mode)']);
+const allocationLocks = new Map<string, Promise<unknown>>();
 
 export async function POST(request: Request) {
   try {
@@ -35,10 +36,27 @@ export async function POST(request: Request) {
     const client = createWalletClient({account, chain: baseSepolia, transport}).extend(publicActions);
     const agreementId = pad(agreementAddress as `0x${string}`, {size: 32});
     const pool = await publicClient.readContract({address: escrow as `0x${string}`, abi, functionName: 'getPool', args: [agreementId]});
-    if (pool[0] < deposit || pool[1] !== 0n || pool[2]) return NextResponse.json({error: 'Base pool is missing collateral or already allocated'}, {status: 409});
-    const hash = await client.writeContract({address: escrow as `0x${string}`, abi, functionName: 'setPayout', args: [agreementId, getAddress(String(agreement.owner)), ownerAmount, getAddress(String(agreement.renter)), renterAmount]});
-    const receipt = await client.waitForTransactionReceipt({hash});
-    if (receipt.status !== 'success') return NextResponse.json({error: 'Payout allocation reverted', hash}, {status: 502});
-    return NextResponse.json({hash});
+    if (pool[2]) {
+      if (pool[1] !== deposit) return NextResponse.json({error: 'Base payout allocation is inconsistent with the authoritative deposit'}, {status: 409});
+      return NextResponse.json({status: 'already_allocated', hash: null, allocated: String(pool[1])});
+    }
+    if (pool[0] < deposit || pool[1] !== 0n) return NextResponse.json({error: 'Base pool is missing collateral or has an inconsistent allocation'}, {status: 409});
+    const lockKey = `${escrow.toLowerCase()}:${agreementAddress.toLowerCase()}`;
+    const current = allocationLocks.get(lockKey);
+    if (current) return NextResponse.json(await current);
+    const operation = (async () => {
+      const latest = await publicClient.readContract({address: escrow as `0x${string}`, abi, functionName: 'getPool', args: [agreementId]});
+      if (latest[2]) return {status: 'already_allocated', hash: null, allocated: String(latest[1])};
+      const hash = await client.writeContract({address: escrow as `0x${string}`, abi, functionName: 'setPayout', args: [agreementId, getAddress(String(agreement.owner)), ownerAmount, getAddress(String(agreement.renter)), renterAmount]});
+      const receipt = await client.waitForTransactionReceipt({hash});
+      if (receipt.status !== 'success') throw new Error(`Payout allocation reverted: ${hash}`);
+      const confirmed = await publicClient.readContract({address: escrow as `0x${string}`, abi, functionName: 'getPool', args: [agreementId]});
+      if (!confirmed[2] || confirmed[1] !== deposit) throw new Error('Payout allocation did not pass authoritative Base readback');
+      return {status: 'allocated', hash, allocated: String(confirmed[1])};
+    })();
+    allocationLocks.set(lockKey, operation);
+    try { return NextResponse.json(await operation); }
+    catch (error) { return NextResponse.json({error: error instanceof Error ? error.message : String(error)}, {status: 502}); }
+    finally { allocationLocks.delete(lockKey); }
   } catch (error) { return NextResponse.json({error: error instanceof Error ? error.message : String(error)}, {status: 500}); }
 }

@@ -5,7 +5,7 @@ import {createPublicClient, createWalletClient, getAddress, http, parseAbi, publ
 import {privateKeyToAccount} from 'viem/accounts';
 import {baseSepolia} from 'viem/chains';
 
-const escrowAbi = parseAbi(['function registerAgreement(bytes32,address,uint256)','function getPool(bytes32) view returns (uint256,uint256,bool)']);
+const escrowAbi = parseAbi(['function registerAgreement(bytes32,address,uint256)','function getPool(bytes32) view returns (uint256,uint256,bool)','function pools(bytes32) view returns (uint256,uint256,bool,bool,bool,address,uint256)']);
 const agreementAbi = parseAbi(['function get_agreement() view returns (address owner,address renter,string item_label,string serial_hash,string rubric,string checkout_url,string checkout_hash,uint256 deposit,uint256 minor_bps,uint256 material_bps,uint256 deadline,string status,string definition_hash,address vault,string return_url,string return_hash,string verdict,string same_item,string reason,string same_item_confidence,string new_damage_present,string damage_level,string damage_regions,uint256 reinspection_count)']);
 const vaultAbi = parseAbi(['function get_vault() view returns (address agreement,uint256 credited,bool settled,uint256 owner_claim,uint256 renter_claim,bool owner_claimed,bool renter_claimed,string funding_tx,string owner_claim_tx,string renter_claim_tx,string payout_mode)']);
 
@@ -29,10 +29,15 @@ export async function POST(request: Request) {
     const id = pad(agreement, {size: 32});
     const escrow = (process.env.NEXT_PUBLIC_BASE_ESCROW_ADDRESS || '0x9d0baedb946036a99616c8abecc14f122e21e897') as `0x${string}`;
     const pool = await publicClient.readContract({address: escrow, abi: escrowAbi, functionName: 'getPool', args: [id]});
-    if (pool[0] > 0n || pool[1] > 0n || pool[2]) return NextResponse.json({error: 'Base pool is already funded or allocated'}, {status: 409});
+    const registration = await publicClient.readContract({address: escrow, abi: escrowAbi, functionName: 'pools', args: [id]});
+    if (registration[4]) {
+      if (getAddress(registration[5]) !== getAddress(String(state.renter)) || registration[6] !== BigInt(state.deposit)) return NextResponse.json({error: 'Base registration does not match the authoritative renter or deposit'}, {status: 409});
+      return NextResponse.json({status: 'already_registered', hash: null, renter: state.renter, deposit: String(state.deposit), deposited: String(pool[0]), allocated: String(pool[1]), payoutSet: pool[2]});
+    }
+    if (pool[0] > 0n || pool[1] > 0n || pool[2]) return NextResponse.json({error: 'Base pool is inconsistent: funds exist without a matching registration'}, {status: 409});
     const hash = await client.writeContract({address: escrow, abi: escrowAbi, functionName: 'registerAgreement', args: [id, getAddress(String(state.renter)), BigInt(state.deposit)]});
     const receipt = await client.waitForTransactionReceipt({hash});
     if (receipt.status !== 'success') return NextResponse.json({error: 'Base registration reverted', hash}, {status: 502});
-    return NextResponse.json({hash, renter: state.renter, deposit: String(state.deposit)});
+    return NextResponse.json({status: 'registered', hash, renter: state.renter, deposit: String(state.deposit)});
   } catch (error) { return NextResponse.json({error: error instanceof Error ? error.message : String(error)}, {status: 500}); }
 }

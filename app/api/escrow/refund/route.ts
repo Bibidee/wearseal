@@ -9,6 +9,7 @@ const escrowAbi = parseAbi([
   'function authorizeRefund(bytes32 agreementId,address renter,uint256 amount)',
   'function getPool(bytes32) view returns (uint256,uint256,bool)',
   'function getRefundState(bytes32) view returns (bool,bool,address,uint256)',
+  'function getClaimable(bytes32,address) view returns (uint256)',
 ]);
 export async function POST(request: Request) {
   try {
@@ -31,10 +32,14 @@ export async function POST(request: Request) {
     const id = pad(agreementAddress as `0x${string}`, {size: 32});
     const pool = await base.readContract({address: escrow, abi: escrowAbi, functionName: 'getPool', args: [id]});
     const refundState = await base.readContract({address: escrow, abi: escrowAbi, functionName: 'getRefundState', args: [id]});
-    if (pool[0] !== BigInt(agreement.deposit) || pool[1] !== 0n || pool[2] || !refundState[0] || refundState[1] || getAddress(refundState[2]) !== getAddress(String(agreement.renter)) || refundState[3] !== BigInt(agreement.deposit)) return NextResponse.json({error: 'Base escrow cancellation readback is not eligible'}, {status: 409});
+    if (pool[0] !== BigInt(agreement.deposit) || pool[1] !== 0n || pool[2] || !refundState[0] || getAddress(refundState[2]) !== getAddress(String(agreement.renter)) || refundState[3] !== BigInt(agreement.deposit)) return NextResponse.json({error: 'Base escrow cancellation readback is not eligible'}, {status: 409});
+    if (refundState[1]) {
+      const claimable = await base.readContract({address: escrow, abi: escrowAbi, functionName: 'getClaimable', args: [id, getAddress(String(agreement.renter))]});
+      return NextResponse.json({status: 'already_authorized', hash: null, renter: agreement.renter, amount: String(agreement.deposit), claimable: String(claimable)});
+    }
     const hash = await client.writeContract({address: escrow, abi: escrowAbi, functionName: 'authorizeRefund', args: [id, getAddress(String(agreement.renter)), BigInt(agreement.deposit)]});
     const receipt = await client.waitForTransactionReceipt({hash});
     if (receipt.status !== 'success') return NextResponse.json({error: 'Refund authorization reverted', hash}, {status: 502});
-    return NextResponse.json({hash, renter: agreement.renter, amount: String(agreement.deposit)});
+    return NextResponse.json({status: 'authorized', hash, renter: agreement.renter, amount: String(agreement.deposit)});
   } catch (error) { return NextResponse.json({error: error instanceof Error ? error.message : String(error)}, {status: 500}); }
 }
