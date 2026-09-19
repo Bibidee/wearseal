@@ -46,6 +46,8 @@ export async function POST(request: Request) {
     const logs = parseEventLogs({abi: escrowAbi, logs: receipt.logs, eventName: 'Claimed'});
     const claimed = logs.find(log => getAddress(String(log.args.recipient)) === getAddress(String(body.kind === 'owner_claim' ? agreement.owner : agreement.renter)) && String(log.args.agreementId).toLowerCase() === id.toLowerCase());
     if (!claimed) return NextResponse.json({error: 'No matching finalized payout event found'}, {status: 409});
+    if (body.kind === 'owner_claim' && vault.owner_claimed) return NextResponse.json({error: 'Owner claim is already acknowledged'}, {status: 409});
+    if (body.kind === 'renter_claim' && vault.renter_claimed) return NextResponse.json({error: 'Renter claim is already acknowledged'}, {status: 409});
     const expected = BigInt(body.kind === 'owner_claim' ? vault.owner_claim : vault.renter_claim);
     if (BigInt(claimed.args.amount) !== expected || getAddress(String(transaction.from)) !== getAddress(String(body.kind === 'owner_claim' ? agreement.owner : agreement.renter))) return NextResponse.json({error: 'Claim amount or recipient does not match authoritative Vault state'}, {status: 409});
     const functionName = body.kind === 'owner_claim' ? 'ack_owner_claim' : 'ack_renter_claim';
