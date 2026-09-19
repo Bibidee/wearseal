@@ -41,6 +41,8 @@
       "sameItemConfidence": "HIGH",
       "newDamagePresent": "YES",
       "damageLevel": "MINOR",
+      "damageRegions": ["A new red linear scratch across the central circular feature."],
+      "reason": "The checkout image shows a clean surface. The return image shows a distinct red scratch across the center that was not present previously.",
       "vaultCreditedWei": "0",
       "ownerClaimed": true,
       "renterClaimed": true,
@@ -52,23 +54,34 @@
     "ownerAllocationWei": "150000000000000",
     "renterAllocationWei": "850000000000000",
     "conservation": true,
-    "creditedAfterSettlementWei": "0"
+    "creditedAfterSettlementWei": "0",
+    "ownerChildTransferWei": "150000000000000",
+    "renterChildTransferWei": "850000000000000",
+    "accountBalanceDeltaIndependentlyCaptured": false
   },
   "replayProof": {
     "duplicateSettlementTx": "0x85b281fbd17b84a1f07e91f7fa1fa2dcee31ab3a85d875dbd83c37a8cef7eefe",
     "duplicateSettlementResult": "CONTRACT_ERROR; state unchanged",
     "duplicateOwnerClaimTx": "0x30a47abcf3d7b02e99cca32af826126020f4a40b5cb061386e71a28a9f63640f",
-    "duplicateOwnerClaimResult": "CONTRACT_ERROR; state unchanged"
+    "duplicateOwnerClaimResult": "CONTRACT_ERROR; state unchanged",
+    "duplicateRenterClaimResult": "Not executed live: the renter EOA is not an unlocked CLI account; the Direct Mode suite rejects duplicate renter claims."
+  },
+  "testEvidence": {
+    "contractTestsCollected": 60,
+    "genuineAgreementVaultPairTests": 13,
+    "frontendTests": 17
   },
   "production": {
     "url": "https://wearseal.vercel.app",
     "deploymentId": "dpl_DPTR1GyUpvfwVJHZFJKMDftum7sX",
     "readyState": "READY",
+    "productionCommit": "32448ce",
     "liveAgreement": "0xe25aDC922649D99f688661E280042baE47272272",
     "liveVault": "0xDf2360ceCc3a00fDFA3E9d898e781b8e87e0fb0f"
   },
   "limitations": {
     "claimTransfer": "GenLayer value transfers are asynchronous child messages. The contract cannot receive an in-contract child-success acknowledgement or automatically roll back a claim flag on child failure; payout child receipts must be followed off-chain.",
+    "directModePayout": "glsim has no EVM recipient implementation, so its payout call is not delivery evidence.",
     "ready": false
   }
 }
