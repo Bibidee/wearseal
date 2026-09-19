@@ -2,86 +2,27 @@
   "network": "Studionet",
   "chainId": 61999,
   "source": {
-    "commit": "32448ce",
+    "commit": "29bb31e",
     "agreementSha256": "c6b492d974139a7c6f21344e0ac7684bf9ae24e0bd9a7c702f386a8ca5b904f2",
-    "vaultSha256": "482e730757dff7238865b8edc7b157677d70e1c23cb3137e316964c0563c6cf3",
-    "definitionSha256": "0x84c90a05e88b05d589f83eca8412200dd6445c5ad7494a2db76506b7dd1707b4"
+    "vaultSha256": "238ac2437de32ada7f88ba7bc25048b0d8e886d4032bd39f6bbdad1f8da50748"
   },
   "addresses": {
-    "agreement": "0xe25aDC922649D99f688661E280042baE47272272",
-    "vault": "0xDf2360ceCc3a00fDFA3E9d898e781b8e87e0fb0f",
-    "owner": "0x79b3Ecbe6a65beE93b2Fcda78e6909892671507F",
-    "renter": "0xfb67de8f364b97cfdfef45adafa6a7739ae572f2"
+    "agreement": "0x06569280c7B478E6c4e9501CD29b4Fa25b0DF067",
+    "vault": "0xE1B4398af7274aa9492Dc5878Eb406DbEc68a39c"
   },
   "deployment": {
-    "agreementTx": "0xc8bf9f482d815df365fd4cdb6a1daed7c4142a5ed8ff30a1085360aed0be016d",
-    "vaultTx": "0x296ca970289c4390ef54f1a73bdad4ed31b63cfe1865ed5d93325c6e5532c934",
-    "bindingTx": "0xe52bb15172bdda87b844115e5e6c718e8558dc6a7c40d54f3c9778c3de3c3533"
+    "agreementTx": "0x117ebd3ad90406410f442f1739c90ec9953dbcb8b9dc2d54e9e149bac5e26f70",
+    "vaultTx": "0xb0b699e2cf8d2d14f8208b1228ec7da1a2c303bba94f309e01481b5f8e1b7b5d",
+    "bindingTx": "0xe5750dfb0c0745b209aa38fecd7d9422c7dd4726c2fb12a4c9cb83ccbed40f6f"
   },
-  "evidence": {
-    "checkoutUrl": "https://raw.githubusercontent.com/Bibidee/wearseal/32448ce/public/fixtures/checkout.png",
-    "checkoutSha256": "0xc566e8a933cd6d1b2201bbc4f4820d8cfdf071099266cf931019350edeca71bb",
-    "returnUrl": "https://raw.githubusercontent.com/Bibidee/wearseal/32448ce/public/fixtures/return.png",
-    "returnSha256": "0xdfd3c7d3e79288a13afd626872e165a39ad68a1c8d054ab1d02d108887e0894d"
+  "baseEscrow": {
+    "network": "Base Sepolia",
+    "chainId": 84532,
+    "address": "0x562f1fc218beccb9e525d148618526a03ae7aa9e",
+    "deploymentTx": "0xb945b36f619323af7529f931edc73e18f114659124bfb54df8b735af434058fc",
+    "sourceSha256": "5f09eed59afed26c542bf4211dfad63b11221c3bfe30949107c3f8faaf54c67d"
   },
-  "lifecycle": {
-    "acceptBaselineTx": "0x530801fb0fcd07b23573171e530ac3f10fef95a6cc769f23ed7dd176eb8af9c3",
-    "depositTx": "0x0927b28d1e5027d1c691c3b0f1764768eaf0a9b2d4118bb737fee3decb4afecd",
-    "submitReturnTx": "0x20bf236e9bb8cc1161195bd989df7bc4a9559536ab9ba386fc5afd83f8622e19",
-    "inspectionTx": "0xfcdc25dde801ba88e539a6876189467777b98efc53b739f6194366c15ab68ec2",
-    "settlementTx": "0xa42c8d83aeb6456e7d4e295617f29e6b0a9e932a2c40bee52cfc6c1bc421ae40",
-    "renterClaimTx": "0x7d7d53d04cdb9f0e2ba6645726acbac04c48afd46e55cc14c22e3c7c2803c850",
-    "ownerClaimTx": "0xb18c8ac4b348494dba52ae4bb00127ee7dd3d516b58c99c218a54fbd27dddb8c",
-    "renterPayoutChildTx": "0x63c4bfe011c4231a375efda2e75db38aefe94b0d34887df5fadc852672d36026",
-    "ownerPayoutChildTx": "0xeaf14214b24c2945f0adb57dbc555fe258e8e980578128c7d47cf5304639de6e",
-    "finalReadback": {
-      "agreementStatus": "SETTLED",
-      "verdict": "MINOR_DAMAGE",
-      "sameItem": "YES",
-      "sameItemConfidence": "HIGH",
-      "newDamagePresent": "YES",
-      "damageLevel": "MINOR",
-      "damageRegions": ["A new red linear scratch across the central circular feature."],
-      "reason": "The checkout image shows a clean surface. The return image shows a distinct red scratch across the center that was not present previously.",
-      "vaultCreditedWei": "0",
-      "ownerClaimed": true,
-      "renterClaimed": true,
-      "settled": true
-    }
-  },
-  "economics": {
-    "depositWei": "1000000000000000",
-    "ownerAllocationWei": "150000000000000",
-    "renterAllocationWei": "850000000000000",
-    "conservation": true,
-    "creditedAfterSettlementWei": "0",
-    "ownerChildTransferWei": "150000000000000",
-    "renterChildTransferWei": "850000000000000",
-    "accountBalanceDeltaIndependentlyCaptured": false
-  },
-  "replayProof": {
-    "duplicateSettlementTx": "0x85b281fbd17b84a1f07e91f7fa1fa2dcee31ab3a85d875dbd83c37a8cef7eefe",
-    "duplicateSettlementResult": "CONTRACT_ERROR; state unchanged",
-    "duplicateOwnerClaimTx": "0x30a47abcf3d7b02e99cca32af826126020f4a40b5cb061386e71a28a9f63640f",
-    "duplicateOwnerClaimResult": "CONTRACT_ERROR; state unchanged",
-    "duplicateRenterClaimResult": "Not executed live: the renter EOA is not an unlocked CLI account; the Direct Mode suite rejects duplicate renter claims."
-  },
-  "testEvidence": {
-    "contractTestsCollected": 60,
-    "genuineAgreementVaultPairTests": 13,
-    "frontendTests": 17
-  },
-  "production": {
-    "url": "https://wearseal.vercel.app",
-    "deploymentId": "dpl_DPTR1GyUpvfwVJHZFJKMDftum7sX",
-    "readyState": "READY",
-    "productionCommit": "32448ce",
-    "liveAgreement": "0xe25aDC922649D99f688661E280042baE47272272",
-    "liveVault": "0xDf2360ceCc3a00fDFA3E9d898e781b8e87e0fb0f"
-  },
-  "limitations": {
-    "claimTransfer": "GenLayer value transfers are asynchronous child messages. The contract cannot receive an in-contract child-success acknowledgement or automatically roll back a claim flag on child failure; payout child receipts must be followed off-chain.",
-    "directModePayout": "glsim has no EVM recipient implementation, so its payout call is not delivery evidence.",
-    "ready": false
-  }
+  "lifecycle": null,
+  "ready": false,
+  "remaining": "Fresh two-party lifecycle and production relayer configuration are still pending."
 }
